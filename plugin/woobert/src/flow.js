@@ -68,9 +68,71 @@ function CallPreview( { call } ) {
 }
 
 /**
- * Compact rendering of the executor result (count for lists, id for single objects).
+ * Renders a tool's merchant-facing display payload (built server-side by the
+ * executor): a labeled field list for a single object, or a column table for a
+ * list. Falls back to a friendly empty message when a list has no rows.
+ */
+function DisplayView( { display } ) {
+	if ( display.type === 'list' ) {
+		if ( ! display.rows.length ) {
+			return (
+				<p className="woobert-result-summary">{ display.empty }</p>
+			);
+		}
+		return (
+			<div className="woobert-result">
+				<p className="woobert-result-summary">
+					{ display.count } result
+					{ display.count === 1 ? '' : 's' }
+				</p>
+				<table className="woobert-table">
+					<thead>
+						<tr>
+							{ display.columns.map( ( col ) => (
+								<th key={ col }>{ col }</th>
+							) ) }
+						</tr>
+					</thead>
+					<tbody>
+						{ display.rows.map( ( row, r ) => (
+							<tr key={ r }>
+								{ row.map( ( cell, c ) => (
+									<td key={ c }>{ cell }</td>
+								) ) }
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			</div>
+		);
+	}
+
+	return (
+		<div className="woobert-result">
+			{ display.title && (
+				<p className="woobert-result-title">{ display.title }</p>
+			) }
+			<dl className="woobert-fields">
+				{ display.rows.map( ( row ) => (
+					<Fragment key={ row.label }>
+						<dt>{ row.label }</dt>
+						<dd>{ row.value }</dd>
+					</Fragment>
+				) ) }
+			</dl>
+		</div>
+	);
+}
+
+/**
+ * The result view: the tool's merchant-facing display when it has one, else a
+ * fallback to the raw (syntax-highlighted) response.
  */
 function ResultPreview( { result } ) {
+	if ( result?.display ) {
+		return <DisplayView display={ result.display } />;
+	}
+
 	const data = result?.data;
 	let summary = '';
 	if ( Array.isArray( data ) ) {
@@ -91,7 +153,7 @@ function ResultPreview( { result } ) {
  * returned, the REST request the executor ran, the HTTP status, and any error.
  * Hidden behind a toggle so the default view stays free of developer noise.
  */
-function DebugInfo( { call, result, error } ) {
+function DebugInfo( { call, result, error, response } ) {
 	return (
 		<details className="woobert-debug">
 			<summary>Debug info</summary>
@@ -106,6 +168,12 @@ function DebugInfo( { call, result, error } ) {
 					<Fragment>
 						<p className="woobert-debug-label">Executor ran</p>
 						<JsonBlock value={ result.request } />
+					</Fragment>
+				) }
+				{ response !== undefined && (
+					<Fragment>
+						<p className="woobert-debug-label">Response</p>
+						<JsonBlock value={ response } />
 					</Fragment>
 				) }
 				{ result?.status != null && (
@@ -241,6 +309,11 @@ export function WoobertFlowModal( { query, onClose } ) {
 							<DebugInfo
 								call={ flow.call }
 								result={ flow.result }
+								response={
+									flow.result?.display
+										? flow.result?.data
+										: undefined
+								}
 							/>
 						</Fragment>
 					) }

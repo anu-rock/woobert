@@ -45,7 +45,20 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/orders", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/orders", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No orders found.",
+          "fields": [
+            { "label": "Order", "path": "number" },
+            { "label": "Status", "path": "status", "format": "status" },
+            { "label": "Date", "path": "date_created", "format": "date" },
+            { "label": "Customer", "paths": ["billing.first_name", "billing.last_name"] },
+            { "label": "Total", "path": "total", "format": "currency" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -60,7 +73,22 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/orders/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/orders/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Order #{number}",
+          "fields": [
+            { "label": "Status", "path": "status", "format": "status" },
+            { "label": "Date", "path": "date_created", "format": "date" },
+            { "label": "Customer", "paths": ["billing.first_name", "billing.last_name"] },
+            { "label": "Email", "path": "billing.email" },
+            { "label": "Payment", "path": "payment_method_title" },
+            { "label": "Items", "path": "line_items", "format": "count" },
+            { "label": "Total", "path": "total", "format": "currency" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -155,7 +183,20 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/products", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/products", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No products found.",
+          "fields": [
+            { "label": "Product", "path": "name" },
+            { "label": "SKU", "path": "sku" },
+            { "label": "Price", "path": "price", "format": "currency" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" },
+            { "label": "Status", "path": "status", "format": "status" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -170,7 +211,20 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/products/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/products/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "{name}",
+          "fields": [
+            { "label": "SKU", "path": "sku" },
+            { "label": "Type", "path": "type", "format": "status" },
+            { "label": "Price", "path": "price", "format": "currency" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" },
+            { "label": "Status", "path": "status", "format": "status" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -390,7 +444,19 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/reports/customers", "path_params": [], "namespace": "wc-analytics", "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/reports/customers", "path_params": [], "namespace": "wc-analytics", "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No customers found.",
+          "fields": [
+            { "label": "Customer", "path": "name" },
+            { "label": "Orders", "path": "orders_count" },
+            { "label": "Spend", "path": "total_spend", "format": "currency" },
+            { "label": "Last active", "path": "date_last_active", "format": "date" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -437,7 +503,20 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/coupons", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/coupons", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No coupons found.",
+          "fields": [
+            { "label": "Code", "path": "code" },
+            { "label": "Type", "path": "discount_type", "format": "status" },
+            { "label": "Amount", "path": "amount" },
+            { "label": "Expires", "path": "date_expires", "format": "date" },
+            { "label": "Used", "path": "usage_count" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -530,7 +609,17 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/reports/top_sellers", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/reports/top_sellers", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No sales in this period.",
+          "fields": [
+            { "label": "Product", "path": "name" },
+            { "label": "Sold", "path": "quantity" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
