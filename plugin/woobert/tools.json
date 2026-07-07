@@ -104,7 +104,18 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/orders/{id}", "path_params": ["id"], "confirm": true }
+      "x-woo": {
+        "method": "POST", "path": "/orders/{id}", "path_params": ["id"], "confirm": true,
+        "display": {
+          "type": "object",
+          "title": "Order #{number} updated",
+          "fields": [
+            { "label": "Status", "path": "status", "format": "status" },
+            { "label": "Customer", "paths": ["billing.first_name", "billing.last_name"] },
+            { "label": "Total", "path": "total", "format": "currency" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -122,7 +133,18 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/orders/{id}/refunds", "path_params": ["id"], "confirm": true }
+      "x-woo": {
+        "method": "POST", "path": "/orders/{id}/refunds", "path_params": ["id"], "confirm": true,
+        "display": {
+          "type": "object",
+          "title": "Refund issued",
+          "fields": [
+            { "label": "Amount", "path": "amount", "format": "currency" },
+            { "label": "Reason", "path": "reason" },
+            { "label": "Date", "path": "date_created", "format": "date" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -139,7 +161,17 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/orders/{id}/notes", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "POST", "path": "/orders/{id}/notes", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Note added",
+          "fields": [
+            { "label": "Note", "path": "note" },
+            { "label": "Customer note", "path": "customer_note", "format": "bool" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -252,7 +284,20 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/products", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "POST", "path": "/products", "path_params": [], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Product created",
+          "fields": [
+            { "label": "Name", "path": "name" },
+            { "label": "SKU", "path": "sku" },
+            { "label": "Price", "path": "price", "format": "currency" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" },
+            { "label": "Status", "path": "status", "format": "status" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -276,7 +321,20 @@
           }
         }
       },
-      "x-woo": { "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Product updated",
+          "fields": [
+            { "label": "Name", "path": "name" },
+            { "label": "SKU", "path": "sku" },
+            { "label": "Price", "path": "price", "format": "currency" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" },
+            { "label": "Status", "path": "status", "format": "status" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -294,7 +352,18 @@
           }
         }
       },
-      "x-woo": { "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Stock updated",
+          "fields": [
+            { "label": "Product", "path": "name" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" },
+            { "label": "Quantity", "path": "stock_quantity" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -310,7 +379,17 @@
           }
         }
       },
-      "x-woo": { "method": "DELETE", "path": "/products/{id}", "path_params": ["id"], "confirm": true }
+      "x-woo": {
+        "method": "DELETE", "path": "/products/{id}", "path_params": ["id"], "confirm": true,
+        "display": {
+          "type": "object",
+          "title": "Product deleted",
+          "fields": [
+            { "label": "Name", "path": "name" },
+            { "label": "SKU", "path": "sku" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -354,7 +433,19 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false }
+      "x-woo": {
+        "method": "POST", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Variation created",
+          "fields": [
+            { "label": "Variation", "path": "name" },
+            { "label": "SKU", "path": "sku" },
+            { "label": "Price", "path": "price", "format": "currency" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -391,7 +482,19 @@
           }
         }
       },
-      "x-woo": { "method": "PUT", "path": "/products/reviews/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "PUT", "path": "/products/reviews/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Review updated",
+          "fields": [
+            { "label": "Status", "path": "status", "format": "status" },
+            { "label": "Reviewer", "path": "reviewer" },
+            { "label": "Rating", "path": "rating" },
+            { "label": "Product", "path": "product_name" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -484,7 +587,19 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/coupons", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "POST", "path": "/coupons", "path_params": [], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Coupon created",
+          "fields": [
+            { "label": "Code", "path": "code" },
+            { "label": "Type", "path": "discount_type", "format": "status" },
+            { "label": "Amount", "path": "amount" },
+            { "label": "Expires", "path": "date_expires", "format": "date" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -538,7 +653,19 @@
           }
         }
       },
-      "x-woo": { "method": "PUT", "path": "/coupons/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "PUT", "path": "/coupons/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Coupon updated",
+          "fields": [
+            { "label": "Code", "path": "code" },
+            { "label": "Type", "path": "discount_type", "format": "status" },
+            { "label": "Amount", "path": "amount" },
+            { "label": "Expires", "path": "date_expires", "format": "date" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -577,7 +704,17 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/products/categories", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "POST", "path": "/products/categories", "path_params": [], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Category created",
+          "fields": [
+            { "label": "Name", "path": "name" },
+            { "label": "Slug", "path": "slug" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -654,7 +791,17 @@
           }
         }
       },
-      "x-woo": { "method": "POST", "path": "/products/tags", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "POST", "path": "/products/tags", "path_params": [], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Tag created",
+          "fields": [
+            { "label": "Name", "path": "name" },
+            { "label": "Slug", "path": "slug" }
+          ]
+        }
+      }
     }
   ]
 }
