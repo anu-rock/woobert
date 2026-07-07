@@ -187,7 +187,18 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/orders/{id}/notes", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/orders/{id}/notes", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No notes on this order.",
+          "fields": [
+            { "label": "Note", "path": "note" },
+            { "label": "Date", "path": "date_created", "format": "date" },
+            { "label": "Customer note", "path": "customer_note", "format": "bool" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -406,7 +417,19 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No variations found.",
+          "fields": [
+            { "label": "Variation", "path": "name" },
+            { "label": "SKU", "path": "sku" },
+            { "label": "Price", "path": "price", "format": "currency" },
+            { "label": "Stock", "path": "stock_status", "format": "stock" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -466,7 +489,19 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/products/reviews", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/products/reviews", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No reviews found.",
+          "fields": [
+            { "label": "Product", "path": "product_name" },
+            { "label": "Reviewer", "path": "reviewer" },
+            { "label": "Rating", "path": "rating" },
+            { "label": "Status", "path": "status", "format": "status" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -514,7 +549,19 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/customers", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/customers", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No customers found.",
+          "fields": [
+            { "label": "Customer", "paths": ["first_name", "last_name"] },
+            { "label": "Email", "path": "email" },
+            { "label": "Role", "path": "role", "format": "status" },
+            { "label": "Joined", "path": "date_created", "format": "date" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -529,7 +576,19 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/customers/{id}", "path_params": ["id"], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/customers/{id}", "path_params": ["id"], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "{first_name} {last_name}",
+          "fields": [
+            { "label": "Email", "path": "email" },
+            { "label": "Username", "path": "username" },
+            { "label": "Role", "path": "role", "format": "status" },
+            { "label": "Joined", "path": "date_created", "format": "date" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -685,7 +744,18 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/products/categories", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/products/categories", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No categories found.",
+          "fields": [
+            { "label": "Category", "path": "name" },
+            { "label": "Slug", "path": "slug" },
+            { "label": "Products", "path": "count" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -730,7 +800,23 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/reports/sales", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/reports/sales", "path_params": [], "confirm": false,
+        "display": {
+          "type": "object",
+          "title": "Sales report",
+          "fields": [
+            { "label": "Total sales", "path": "0.total_sales", "format": "currency" },
+            { "label": "Net sales", "path": "0.net_sales", "format": "currency" },
+            { "label": "Orders", "path": "0.total_orders" },
+            { "label": "Items", "path": "0.total_items" },
+            { "label": "Tax", "path": "0.total_tax", "format": "currency" },
+            { "label": "Shipping", "path": "0.total_shipping", "format": "currency" },
+            { "label": "Discounts", "path": "0.total_discount", "format": "currency" },
+            { "label": "Refunds", "path": "0.total_refunds", "format": "currency" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
@@ -774,7 +860,18 @@
           }
         }
       },
-      "x-woo": { "method": "GET", "path": "/products/tags", "path_params": [], "confirm": false }
+      "x-woo": {
+        "method": "GET", "path": "/products/tags", "path_params": [], "confirm": false,
+        "display": {
+          "type": "list",
+          "empty": "No tags found.",
+          "fields": [
+            { "label": "Tag", "path": "name" },
+            { "label": "Slug", "path": "slug" },
+            { "label": "Products", "path": "count" }
+          ]
+        }
+      }
     },
     {
       "type": "function",
