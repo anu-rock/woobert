@@ -5,7 +5,7 @@
  * runs and offers no surface to render progress. So once "Ask Woobert" is
  * selected there, we drive the resolve -> (confirm) -> execute -> result flow in
  * this self-contained modal instead. It reuses the woobert/v1 proxy (api.js) and
- * the shared .woobert-* styling, so it looks and behaves like the kbar panel.
+ * the shared .woobert-* styling.
  */
 
 import { useState, useEffect, useCallback, Fragment } from '@wordpress/element';

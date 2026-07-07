@@ -91,7 +91,25 @@ class Woobert_Settings {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Woobert', 'woobert' ); ?></h1>
-			<p><?php esc_html_e( 'Connect Woobert to your inference endpoint. Press ⌘K / Ctrl-K anywhere in wp-admin to open the command bar.', 'woobert' ); ?></p>
+			<div class="card">
+				<p><strong><?php esc_html_e( 'Run your whole store from one prompt.', 'woobert' ); ?></strong></p>
+				<p>
+					<?php esc_html_e( 'Type what you want in plain English, like "refund order 1042", "add a Large/Red variation to this product at 54.99", or "who are my top customers this month". Woobert turns it into the right WooCommerce action and runs it, under your own admin session. No menu hunting, no keys in the browser.', 'woobert' ); ?>
+				</p>
+				<p>
+					<?php
+					printf(
+						/* translators: %s: link to the Fernfly website. */
+						wp_kses(
+							__( 'Woobert is powered by <strong>Fern</strong>, a family of tiny function-calling models by %s. The model maps your request to a WooCommerce REST API call; the plugin runs it server-side and shows you the result.', 'woobert' ),
+							array( 'strong' => array() )
+						),
+						'<a href="' . esc_url( 'https://fernfly.com' ) . '" target="_blank" rel="noreferrer">Fernfly</a>'
+					);
+					?>
+				</p>
+			</div>
+			<p><?php esc_html_e( 'Connect Woobert to your inference endpoint. Press ⌘K / Ctrl-K anywhere in wp-admin and pick "Ask Woobert" to open the command palette.', 'woobert' ); ?></p>
 			<form method="post" action="options.php">
 				<?php settings_fields( self::OPTION_GROUP ); ?>
 				<table class="form-table" role="presentation">

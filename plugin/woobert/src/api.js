@@ -9,7 +9,7 @@
  * Read the runtime config injected by wp_localize_script.
  */
 export function config() {
-	return typeof woobert !== 'undefined' ? woobert : { root: '', nonce: '', context: {}, links: {} };
+	return typeof woobert !== 'undefined' ? woobert : { root: '', nonce: '', context: {} };
 }
 
 /**

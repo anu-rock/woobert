@@ -1,7 +1,7 @@
 === Woobert ===
 Contributors: anuragbhandari
 Tags: woocommerce, ai, command-bar, productivity, merchant-experience
-Requires at least: 6.4
+Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.0
 Stable tag: 0.1.0
@@ -12,7 +12,7 @@ Agentic command bar for WooCommerce merchants. Type a request in plain English a
 
 == Description ==
 
-Press Cmd/Ctrl-K anywhere in wp-admin to open Woobert. Alongside quick navigation to common WooCommerce pages, type a natural-language request such as "refund order 1042", "create a coupon SUMMER20 for 20% off", or "who are my top customers this month". Woobert turns the request into the matching action and executes it against the WooCommerce REST API v3 using your current admin session, so no API keys ever touch the browser. Destructive actions (refunds, deletes, status changes) ask for confirmation first.
+Press Cmd/Ctrl-K anywhere in wp-admin to open the WordPress command palette, then pick "Ask Woobert" and type a natural-language request such as "refund order 1042", "create a coupon SUMMER20 for 20% off", or "who are my top customers this month". Woobert turns the request into the matching action and executes it against the WooCommerce REST API v3 using your current admin session, so no API keys ever touch the browser. Destructive actions (refunds, deletes, status changes) ask for confirmation first.
 
 Woobert is powered by Fern, a family of small function-calling models by Fernfly. See https://fernfly.com.
 
@@ -26,4 +26,4 @@ Woobert is powered by Fern, a family of small function-calling models by Fernfly
 == Changelog ==
 
 = 0.1.0 =
-* Initial release: command bar, resolve/execute inference proxy, confirmation for destructive actions, About panel.
+* Initial release: "Ask Woobert" command in the WordPress command palette, resolve/execute inference proxy, confirmation for destructive actions.

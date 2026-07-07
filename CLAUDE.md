@@ -51,7 +51,7 @@ shippable product: no "demo" framing in code, UI, or docs.
 
 ## Project layout
 
-- `plugin/woobert/` — `src/` (kbar front-end, built with `@wordpress/scripts`), `includes/`
+- `plugin/woobert/` — `src/` (command-palette front-end, built with `@wordpress/scripts`), `includes/`
   (PHP: `class-rest-proxy`, `class-executor`, `class-fern-client`, `class-tools`,
   `class-settings`). Main file: `woobert.php`. PHP classes are prefixed `Woobert_`;
   plugin constants `WOOBERT_*` (VERSION/PATH/URL); the inference endpoint URL + API key
