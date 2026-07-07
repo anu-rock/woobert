@@ -304,7 +304,6 @@ export function WoobertFlowModal( { query, onClose } ) {
 
 					{ flow.phase === 'done' && (
 						<Fragment>
-							<p className="woobert-status is-ok">Done.</p>
 							<ResultPreview result={ flow.result } />
 							<DebugInfo
 								call={ flow.call }
