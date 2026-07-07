@@ -82,6 +82,24 @@
 	word-break: break-word;
 }
 
+/* JSON syntax highlighting tokens. */
+.woobert-json-key {
+	color: #9cdcfe;
+}
+
+.woobert-json-string {
+	color: #ce9178;
+}
+
+.woobert-json-number {
+	color: #b5cea8;
+}
+
+.woobert-json-boolean,
+.woobert-json-null {
+	color: #569cd6;
+}
+
 .woobert-result-summary {
 	margin: 12px 0 0;
 	font-size: 13px;
@@ -108,4 +126,47 @@
 	background: #7bb661;
 	color: #10140f;
 	font-weight: 600;
+}
+
+/* --- Debug info (collapsible) --- */
+
+.woobert-debug {
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid rgba( 255, 255, 255, 0.08 );
+}
+
+.woobert-debug summary {
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+	font-size: 12px;
+	color: #8a939b;
+}
+
+.woobert-debug summary::-webkit-details-marker {
+	display: none;
+}
+
+.woobert-debug summary::before {
+	content: "▸ ";
+}
+
+.woobert-debug[open] summary::before {
+	content: "▾ ";
+}
+
+.woobert-debug-label {
+	margin: 12px 0 0;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: #8a939b;
+}
+
+.woobert-debug-line {
+	margin: 10px 0 0;
+	font-size: 12px;
+	color: #b9c2ca;
+	word-break: break-word;
 }

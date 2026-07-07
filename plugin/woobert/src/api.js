@@ -34,8 +34,16 @@ async function post( path, payload ) {
 	}
 
 	if ( ! res.ok ) {
-		const message = ( data && ( data.error || data.message ) ) || `HTTP ${ res.status }`;
-		throw new Error( message );
+		// The real WooCommerce message is nested at data.data.message (the WC error
+		// body); fall back to our own error/message keys, then the bare status.
+		const message =
+			( data && ( data.error || data.message || data.data?.message ) ) ||
+			`HTTP ${ res.status }`;
+		// Carry the status + parsed body so callers can surface them in debug info.
+		const error = new Error( message );
+		error.status = res.status;
+		error.data = data;
+		throw error;
 	}
 	return data;
 }

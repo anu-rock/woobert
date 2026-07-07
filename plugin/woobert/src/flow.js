@@ -12,15 +12,57 @@ import { useState, useEffect, useCallback, Fragment } from '@wordpress/element';
 import { resolve, execute } from './api';
 
 /**
+ * Pretty-print a value as JSON, HTML-escape it (the data carries user-controlled
+ * strings), then wrap keys/strings/numbers/booleans/null in classed spans. Returns
+ * a safe HTML string, so escaping must happen before the spans are added.
+ */
+function highlightJson( value ) {
+	const json = JSON.stringify( value, null, 2 );
+	if ( json === undefined ) {
+		return '';
+	}
+	const escaped = json
+		.replace( /&/g, '&amp;' )
+		.replace( /</g, '&lt;' )
+		.replace( />/g, '&gt;' );
+	return escaped.replace(
+		/("(?:\\.|[^"\\])*"(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+		( match ) => {
+			let cls = 'number';
+			if ( /^"/.test( match ) ) {
+				cls = /:$/.test( match ) ? 'key' : 'string';
+			} else if ( /true|false/.test( match ) ) {
+				cls = 'boolean';
+			} else if ( /null/.test( match ) ) {
+				cls = 'null';
+			}
+			return `<span class="woobert-json-${ cls }">${ match }</span>`;
+		}
+	);
+}
+
+/**
+ * Pretty-printed, syntax-highlighted JSON block. The HTML is built by
+ * highlightJson, which escapes the payload before adding its own markup.
+ */
+function JsonBlock( { value } ) {
+	return (
+		<pre
+			className="woobert-call-args"
+			// eslint-disable-next-line react/no-danger
+			dangerouslySetInnerHTML={ { __html: highlightJson( value ) } }
+		/>
+	);
+}
+
+/**
  * Shows the tool name + arguments the model chose.
  */
 function CallPreview( { call } ) {
 	return (
 		<div className="woobert-call">
 			<code className="woobert-call-name">{ call.name }</code>
-			<pre className="woobert-call-args">
-				{ JSON.stringify( call.arguments, null, 2 ) }
-			</pre>
+			<JsonBlock value={ call.arguments } />
 		</div>
 	);
 }
@@ -39,10 +81,41 @@ function ResultPreview( { result } ) {
 	return (
 		<div className="woobert-result">
 			{ summary && <p className="woobert-result-summary">{ summary }</p> }
-			<pre className="woobert-call-args">
-				{ JSON.stringify( data, null, 2 )?.slice( 0, 1200 ) }
-			</pre>
+			<JsonBlock value={ data } />
 		</div>
+	);
+}
+
+/**
+ * Collapsed technical detail for merchants who want it: the tool call Fern
+ * returned, the REST request the executor ran, the HTTP status, and any error.
+ * Hidden behind a toggle so the default view stays free of developer noise.
+ */
+function DebugInfo( { call, result, error } ) {
+	return (
+		<details className="woobert-debug">
+			<summary>Debug info</summary>
+			<div className="woobert-debug-body">
+				{ call && (
+					<Fragment>
+						<p className="woobert-debug-label">Fern returned</p>
+						<CallPreview call={ call } />
+					</Fragment>
+				) }
+				{ result?.request && (
+					<Fragment>
+						<p className="woobert-debug-label">Executor ran</p>
+						<JsonBlock value={ result.request } />
+					</Fragment>
+				) }
+				{ result?.status != null && (
+					<p className="woobert-debug-line">
+						HTTP status: { result.status }
+					</p>
+				) }
+				{ error && <p className="woobert-debug-line">Error: { error }</p> }
+			</div>
+		</details>
 	);
 }
 
@@ -62,7 +135,8 @@ export function WoobertFlowModal( { query, onClose } ) {
 			const result = await execute( call );
 			setFlow( { phase: 'done', call, result } );
 		} catch ( e ) {
-			setFlow( { phase: 'error', error: e.message } );
+			// e.data is the executor result body (status, request) on a failed run.
+			setFlow( { phase: 'error', error: e.message, call, result: e.data } );
 		}
 	}, [] );
 
@@ -162,19 +236,36 @@ export function WoobertFlowModal( { query, onClose } ) {
 
 					{ flow.phase === 'done' && (
 						<Fragment>
-							<p className="woobert-status is-ok">
-								Done: { flow.call?.name } · HTTP{ ' ' }
-								{ flow.result?.status }
-							</p>
+							<p className="woobert-status is-ok">Done.</p>
 							<ResultPreview result={ flow.result } />
+							<DebugInfo
+								call={ flow.call }
+								result={ flow.result }
+							/>
 						</Fragment>
 					) }
 
-					{ flow.phase === 'error' && (
-						<p className="woobert-status is-error">
-							{ flow.error }
-						</p>
-					) }
+					{ flow.phase === 'error' &&
+						( flow.call || flow.result ? (
+							// A tool ran and failed: keep the merchant message generic,
+							// tuck the real error + status into debug info.
+							<Fragment>
+								<p className="woobert-status is-error">
+									An error occurred.
+								</p>
+								<DebugInfo
+									call={ flow.call }
+									result={ flow.result }
+									error={ flow.error }
+								/>
+							</Fragment>
+						) : (
+							// No tool ran (e.g. no matching action): the message is
+							// already merchant-friendly, so show it as-is.
+							<p className="woobert-status is-error">
+								{ flow.error }
+							</p>
+						) ) }
 				</div>
 			</div>
 		</div>
