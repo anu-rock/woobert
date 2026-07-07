@@ -1,0 +1,14 @@
+# Secrets & local env
+.env
+secrets/
+
+# Private agent context (Fernfly-internal; shared out of band)
+CLAUDE.local.md
+
+# Node / build output
+node_modules/
+plugin/woobert/build/
+
+# OS / editor
+.DS_Store
+*.log

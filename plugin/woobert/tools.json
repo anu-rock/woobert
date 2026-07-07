@@ -1,0 +1,571 @@
+{
+  "name": "woocommerce-rest-api-v3",
+  "version": "1.0.0",
+  "description": "Merchant-facing tool set for the WooCommerce REST API v3 (wc/v3). Each tool maps a natural-language merchant intent to one authenticated REST call. The Fern model is trained on the `.tools[].function` objects; Woobert's executor reads the private `x-woo` block to dispatch the emitted call server-side.",
+  "docs": "https://developer.woocommerce.com/docs/apis/rest-api/v3/",
+  "api": {
+    "namespace": "wc/v3",
+    "base_path": "/wp-json/wc/v3",
+    "analytics_namespace": "wc-analytics",
+    "analytics_base_path": "/wp-json/wc-analytics",
+    "auth": "HTTP Basic with consumer_key / consumer_secret over HTTPS (or the plugin proxies with the site's own admin context)"
+  },
+  "context_variables": [
+    { "name": "current_order_id", "type": "integer", "description": "Order id of the order page the merchant is currently viewing. Resolves phrases like 'this order' / 'the current order'." },
+    { "name": "current_product_id", "type": "integer", "description": "Product id of the product page the merchant is currently editing. Resolves 'this product' / 'the current product'." },
+    { "name": "current_customer_id", "type": "integer", "description": "Customer id of the customer page currently open, when applicable." },
+    { "name": "shop_domain", "type": "string", "description": "Host of the WooCommerce site, e.g. shop.example.com." }
+  ],
+  "notes": [
+    "The command bar injects context_variables into the prompt so 'current order/product' resolves to a concrete id; the model should still emit that id in the tool call.",
+    "x-woo.method + x-woo.path tell the plugin executor how to dispatch the call. Path parameters (x-woo.path_params) are taken from the tool arguments and substituted into the URL; the rest become query params (GET) or the JSON body (POST/PUT).",
+    "x-woo.namespace overrides the default wc/v3 namespace (used by the analytics-backed reports).",
+    "x-woo.confirm marks destructive or money-moving actions the command bar must confirm before executing.",
+    "To register with Fern, strip the x-woo extension and register the `.tools[].function` objects (OpenAI function-calling shape). x-woo is a private extension only the executor reads."
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "list_orders",
+        "description": "List or search recent orders, optionally filtered by status, customer, product, date range, or free text. Use for 'show my last 10 orders', 'pending orders from this week', 'orders from customer 42'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string", "enum": ["any", "pending", "processing", "on-hold", "completed", "cancelled", "refunded", "failed", "trash"], "description": "Filter by order status." },
+            "customer": { "type": "integer", "description": "Limit to orders placed by this customer id." },
+            "product": { "type": "integer", "description": "Limit to orders containing this product id." },
+            "search": { "type": "string", "description": "Free-text search across order fields (name, email, etc.)." },
+            "after": { "type": "string", "format": "date-time", "description": "ISO8601 date; only orders created after it." },
+            "before": { "type": "string", "format": "date-time", "description": "ISO8601 date; only orders created before it." },
+            "orderby": { "type": "string", "enum": ["date", "id", "title", "modified"], "default": "date", "description": "Sort field." },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc", "description": "Sort direction." },
+            "per_page": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100, "description": "How many orders to return." },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/orders", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_order",
+        "description": "Fetch a single order in full by its id. Use for 'open order 1042', 'show me order #58', 'details of this order'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Order id. Falls back to current_order_id for 'this order'." }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/orders/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "update_order_status",
+        "description": "Change an order's status (mark processing, completed, on-hold, cancelled, etc.). Use for 'mark this order completed', 'set order 88 to processing'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id", "status"],
+          "properties": {
+            "id": { "type": "integer", "description": "Order id. Falls back to current_order_id." },
+            "status": { "type": "string", "enum": ["pending", "processing", "on-hold", "completed", "cancelled", "refunded", "failed"], "description": "New order status." }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/orders/{id}", "path_params": ["id"], "confirm": true }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "refund_order",
+        "description": "Refund an order, in full or a partial amount, optionally through the payment gateway. Use for 'refund this order', 'refund $20 on order 1042 for damaged item'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Order id to refund. Falls back to current_order_id." },
+            "amount": { "type": "string", "description": "Amount to refund as a decimal string, e.g. '20.00'. Omit to refund the full order total." },
+            "reason": { "type": "string", "description": "Reason recorded on the refund." },
+            "api_refund": { "type": "boolean", "default": true, "description": "If true, process the refund through the payment gateway; if false, record it in WooCommerce only." }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/orders/{id}/refunds", "path_params": ["id"], "confirm": true }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "add_order_note",
+        "description": "Add a note to an order, either an internal/private note or one emailed to the customer. Use for 'add a note to this order: packed and shipped', 'note to customer on order 12: item ships Monday'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id", "note"],
+          "properties": {
+            "id": { "type": "integer", "description": "Order id. Falls back to current_order_id." },
+            "note": { "type": "string", "description": "Note text." },
+            "customer_note": { "type": "boolean", "default": false, "description": "If true, the note is shown to and emailed to the customer; if false, it is private/internal." }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/orders/{id}/notes", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_order_notes",
+        "description": "List the notes on an order. Use for 'show notes on this order', 'what notes are on order 12'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Order id. Falls back to current_order_id." },
+            "type": { "type": "string", "enum": ["any", "customer", "internal"], "default": "any", "description": "Filter to customer-facing or internal notes." }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/orders/{id}/notes", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_products",
+        "description": "List, search, or filter products by category, tag, status, type, stock, price, or sale. Use for 'find products with SKU ABC', 'out of stock products', 'products in Hoodies on sale'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "search": { "type": "string", "description": "Free-text search over product name and description." },
+            "category": { "type": "string", "description": "Category id (or comma-separated ids) to filter by." },
+            "tag": { "type": "string", "description": "Tag id (or comma-separated ids) to filter by." },
+            "status": { "type": "string", "enum": ["any", "draft", "pending", "private", "publish"], "description": "Publication status." },
+            "type": { "type": "string", "enum": ["simple", "grouped", "external", "variable"], "description": "Product type." },
+            "sku": { "type": "string", "description": "Filter to products matching this SKU." },
+            "featured": { "type": "boolean", "description": "Only featured products." },
+            "on_sale": { "type": "boolean", "description": "Only products currently on sale." },
+            "stock_status": { "type": "string", "enum": ["instock", "outofstock", "onbackorder"], "description": "Filter by stock status." },
+            "min_price": { "type": "number" },
+            "max_price": { "type": "number" },
+            "orderby": { "type": "string", "enum": ["date", "id", "title", "slug", "price", "popularity", "rating"], "default": "date" },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc" },
+            "per_page": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/products", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_product",
+        "description": "Fetch a single product in full by id. Use for 'open product 210', 'show details of this product'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Product id. Falls back to current_product_id." }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/products/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "create_product",
+        "description": "Create a new product. Use for 'add a product Blue Hoodie priced 49.99', 'create a variable product called Summer Tee'.",
+        "parameters": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "description": "Product name." },
+            "type": { "type": "string", "enum": ["simple", "grouped", "external", "variable"], "default": "simple", "description": "Product type." },
+            "regular_price": { "type": "string", "description": "Regular price as a decimal string, e.g. '49.99'." },
+            "sale_price": { "type": "string", "description": "Sale price as a decimal string." },
+            "description": { "type": "string", "description": "Full product description (HTML allowed)." },
+            "short_description": { "type": "string", "description": "Short/summary description." },
+            "sku": { "type": "string", "description": "Stock keeping unit." },
+            "status": { "type": "string", "enum": ["draft", "pending", "private", "publish"], "default": "publish", "description": "Publication status." },
+            "manage_stock": { "type": "boolean", "description": "Enable stock management at the product level." },
+            "stock_quantity": { "type": "integer", "description": "Initial stock quantity (requires manage_stock)." },
+            "stock_status": { "type": "string", "enum": ["instock", "outofstock", "onbackorder"] },
+            "categories": { "type": "array", "description": "Category assignments.", "items": { "type": "object", "properties": { "id": { "type": "integer" } } } },
+            "tags": { "type": "array", "description": "Tag assignments.", "items": { "type": "object", "properties": { "id": { "type": "integer" } } } },
+            "images": { "type": "array", "description": "Product images; first is the featured image.", "items": { "type": "object", "properties": { "src": { "type": "string", "format": "uri" }, "alt": { "type": "string" } } } }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/products", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "update_product",
+        "description": "Update fields on an existing product (price, name, description, status, categories). Use for 'set this product price to 39.99', 'rename product 210 to Winter Hoodie'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Product id. Falls back to current_product_id." },
+            "name": { "type": "string" },
+            "regular_price": { "type": "string" },
+            "sale_price": { "type": "string" },
+            "description": { "type": "string" },
+            "short_description": { "type": "string" },
+            "status": { "type": "string", "enum": ["draft", "pending", "private", "publish"] },
+            "sku": { "type": "string" },
+            "categories": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" } } } },
+            "images": { "type": "array", "items": { "type": "object", "properties": { "src": { "type": "string", "format": "uri" }, "alt": { "type": "string" } } } }
+          }
+        }
+      },
+      "x-woo": { "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "update_product_stock",
+        "description": "Set a product's inventory: stock quantity and/or stock status. Use for 'set stock of this product to 25', 'mark product 210 out of stock'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Product id. Falls back to current_product_id." },
+            "stock_quantity": { "type": "integer", "description": "New stock quantity." },
+            "manage_stock": { "type": "boolean", "default": true, "description": "Enable product-level stock management." },
+            "stock_status": { "type": "string", "enum": ["instock", "outofstock", "onbackorder"] }
+          }
+        }
+      },
+      "x-woo": { "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "delete_product",
+        "description": "Delete a product, moving it to trash by default or permanently with force. Use for 'delete this product', 'permanently remove product 210'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Product id. Falls back to current_product_id." },
+            "force": { "type": "boolean", "default": false, "description": "If true, bypass trash and permanently delete." }
+          }
+        }
+      },
+      "x-woo": { "method": "DELETE", "path": "/products/{id}", "path_params": ["id"], "confirm": true }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_product_variations",
+        "description": "List the variations of a variable product. Use for 'show variations of this product', 'variations for product 210'.",
+        "parameters": {
+          "type": "object",
+          "required": ["product_id"],
+          "properties": {
+            "product_id": { "type": "integer", "description": "Parent product id. Falls back to current_product_id." },
+            "per_page": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "create_product_variation",
+        "description": "Create a variation on a variable product, setting its attributes, price, SKU, and stock. Use for 'add a Large / Red variation to this product at 54.99'.",
+        "parameters": {
+          "type": "object",
+          "required": ["product_id"],
+          "properties": {
+            "product_id": { "type": "integer", "description": "Parent product id. Falls back to current_product_id." },
+            "regular_price": { "type": "string", "description": "Variation regular price as a decimal string." },
+            "sale_price": { "type": "string" },
+            "sku": { "type": "string" },
+            "description": { "type": "string" },
+            "attributes": {
+              "type": "array",
+              "description": "Attribute selections that define this variation.",
+              "items": { "type": "object", "required": ["name", "option"], "properties": { "name": { "type": "string", "description": "Attribute name, e.g. 'Color'." }, "option": { "type": "string", "description": "Selected value, e.g. 'Red'." } } }
+            },
+            "manage_stock": { "type": "boolean" },
+            "stock_quantity": { "type": "integer" },
+            "image": { "type": "object", "properties": { "src": { "type": "string", "format": "uri" } } }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_product_reviews",
+        "description": "List customer reviews, optionally for specific products or by status. Use for 'reviews for this product', 'reviews for product 210', 'pending reviews to moderate'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "product": { "type": "array", "description": "Product ids to fetch reviews for. Falls back to [current_product_id].", "items": { "type": "integer" } },
+            "status": { "type": "string", "enum": ["all", "hold", "approved", "spam", "trash"], "default": "approved", "description": "Review moderation status." },
+            "reviewer": { "type": "string", "description": "Filter by reviewer name." },
+            "reviewer_email": { "type": "string", "format": "email" },
+            "orderby": { "type": "string", "enum": ["date", "id", "rating", "product"], "default": "date" },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc" },
+            "per_page": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/products/reviews", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "moderate_product_review",
+        "description": "Approve, hold, spam, or trash a product review. Use for 'approve review 88', 'mark this review as spam'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id", "status"],
+          "properties": {
+            "id": { "type": "integer", "description": "Review id." },
+            "status": { "type": "string", "enum": ["approved", "hold", "spam", "trash"], "description": "New moderation status." }
+          }
+        }
+      },
+      "x-woo": { "method": "PUT", "path": "/products/reviews/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_customers",
+        "description": "List or search customers by name, email, or role. Use for 'find customer jane@example.com', 'newest customers', 'search customers named Patel'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "search": { "type": "string", "description": "Free-text search over customer fields." },
+            "email": { "type": "string", "format": "email", "description": "Exact email to look up." },
+            "role": { "type": "string", "enum": ["all", "customer", "administrator", "editor", "author", "subscriber"], "default": "customer" },
+            "orderby": { "type": "string", "enum": ["id", "name", "registered_date", "include"], "default": "registered_date" },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc" },
+            "per_page": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/customers", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_customer",
+        "description": "Fetch a single customer, including billing info and stats, by id. Use for 'show customer 42', 'open this customer'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Customer id. Falls back to current_customer_id." }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/customers/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_top_customers",
+        "description": "Rank customers by total spend or order count over an optional date range (WooCommerce Analytics). Use for 'who are my top customers', 'best customers this month by spend'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "orderby": { "type": "string", "enum": ["total_spend", "orders_count", "name", "date_last_active"], "default": "total_spend", "description": "Ranking metric." },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc" },
+            "order_after": { "type": "string", "format": "date-time", "description": "Only count orders after this ISO8601 date." },
+            "order_before": { "type": "string", "format": "date-time", "description": "Only count orders before this ISO8601 date." },
+            "per_page": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/reports/customers", "path_params": [], "namespace": "wc-analytics", "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "create_coupon",
+        "description": "Create a discount coupon. Use for 'make a 20% coupon SUMMER20', 'create $10 off coupon WELCOME10 min order 50'.",
+        "parameters": {
+          "type": "object",
+          "required": ["code", "amount"],
+          "properties": {
+            "code": { "type": "string", "description": "Coupon code customers enter, e.g. 'SUMMER20'." },
+            "amount": { "type": "string", "description": "Discount value as a decimal string (percent or fixed depending on discount_type)." },
+            "discount_type": { "type": "string", "enum": ["percent", "fixed_cart", "fixed_product"], "default": "fixed_cart", "description": "How the amount is applied." },
+            "description": { "type": "string" },
+            "individual_use": { "type": "boolean", "description": "If true, cannot be combined with other coupons." },
+            "free_shipping": { "type": "boolean", "description": "Grants free shipping when applied." },
+            "minimum_amount": { "type": "string", "description": "Minimum order subtotal required." },
+            "maximum_amount": { "type": "string", "description": "Maximum order subtotal allowed." },
+            "date_expires": { "type": "string", "format": "date", "description": "Expiry date, YYYY-MM-DD." },
+            "usage_limit": { "type": "integer", "description": "Total number of times the coupon can be used." },
+            "usage_limit_per_user": { "type": "integer" },
+            "exclude_sale_items": { "type": "boolean" },
+            "product_ids": { "type": "array", "description": "Restrict to these product ids.", "items": { "type": "integer" } },
+            "email_restrictions": { "type": "array", "description": "Restrict to these customer emails.", "items": { "type": "string", "format": "email" } }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/coupons", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_coupons",
+        "description": "List or search existing coupons. Use for 'show all coupons', 'find coupon SUMMER20'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "search": { "type": "string", "description": "Free-text search over coupon code and description." },
+            "code": { "type": "string", "description": "Exact coupon code to look up." },
+            "orderby": { "type": "string", "enum": ["date", "id", "title", "modified"], "default": "date" },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "desc" },
+            "per_page": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/coupons", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "update_coupon",
+        "description": "Update an existing coupon's amount, type, expiry, limits, or restrictions. Use for 'change SUMMER20 to 25%', 'extend coupon 5 expiry to 2026-12-31'.",
+        "parameters": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "integer", "description": "Coupon id." },
+            "amount": { "type": "string" },
+            "discount_type": { "type": "string", "enum": ["percent", "fixed_cart", "fixed_product"] },
+            "description": { "type": "string" },
+            "date_expires": { "type": "string", "format": "date" },
+            "usage_limit": { "type": "integer" },
+            "minimum_amount": { "type": "string" },
+            "maximum_amount": { "type": "string" }
+          }
+        }
+      },
+      "x-woo": { "method": "PUT", "path": "/coupons/{id}", "path_params": ["id"], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_product_categories",
+        "description": "List or search product categories. Use for 'show product categories', 'subcategories of Apparel'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "search": { "type": "string" },
+            "parent": { "type": "integer", "description": "Only categories under this parent category id." },
+            "hide_empty": { "type": "boolean", "description": "Exclude categories with no products." },
+            "orderby": { "type": "string", "enum": ["id", "name", "slug", "count"], "default": "name" },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "asc" },
+            "per_page": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/products/categories", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "create_product_category",
+        "description": "Create a product category, optionally nested under a parent. Use for 'add a category Outerwear', 'create subcategory Hoodies under Apparel'.",
+        "parameters": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "description": "Category name." },
+            "parent": { "type": "integer", "description": "Parent category id for nesting." },
+            "description": { "type": "string" },
+            "slug": { "type": "string" },
+            "display": { "type": "string", "enum": ["default", "products", "subcategories", "both"], "default": "default", "description": "How the category archive page displays." }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/products/categories", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_sales_report",
+        "description": "Fetch a sales totals report over a period or explicit date range (gross/net sales, orders, items, refunds). Use for 'sales this month', 'how much did I sell last week'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "period": { "type": "string", "enum": ["week", "month", "last_month", "year"], "description": "Predefined period; ignored if date_min/date_max are given." },
+            "date_min": { "type": "string", "format": "date", "description": "Range start, YYYY-MM-DD." },
+            "date_max": { "type": "string", "format": "date", "description": "Range end, YYYY-MM-DD." }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/reports/sales", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_top_sellers",
+        "description": "Fetch the best-selling products over a period or date range. Use for 'top sellers this month', 'best selling products last week'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "period": { "type": "string", "enum": ["week", "month", "last_month", "year"], "description": "Predefined period; ignored if date_min/date_max are given." },
+            "date_min": { "type": "string", "format": "date" },
+            "date_max": { "type": "string", "format": "date" }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/reports/top_sellers", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "list_product_tags",
+        "description": "List or search product tags. Use for 'show product tags', 'find tag summer'.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "search": { "type": "string" },
+            "orderby": { "type": "string", "enum": ["id", "name", "slug", "count"], "default": "name" },
+            "order": { "type": "string", "enum": ["asc", "desc"], "default": "asc" },
+            "per_page": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 },
+            "page": { "type": "integer", "default": 1, "minimum": 1 }
+          }
+        }
+      },
+      "x-woo": { "method": "GET", "path": "/products/tags", "path_params": [], "confirm": false }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "create_product_tag",
+        "description": "Create a product tag. Use for 'add a tag clearance', 'create tag new-arrival'.",
+        "parameters": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "description": "Tag name." },
+            "description": { "type": "string" },
+            "slug": { "type": "string" }
+          }
+        }
+      },
+      "x-woo": { "method": "POST", "path": "/products/tags", "path_params": [], "confirm": false }
+    }
+  ]
+}

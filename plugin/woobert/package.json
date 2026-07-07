@@ -1,0 +1,19 @@
+{
+  "name": "woobert",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agentic command bar for WooCommerce merchants, powered by Fern small language model.",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js src",
+    "format": "wp-scripts format src"
+  },
+  "dependencies": {
+    "kbar": "^0.1.0-beta.48"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^32.6.0"
+  }
+}
