@@ -48,28 +48,6 @@ const woobertIcon = (
 	</svg>
 );
 
-// A simple clock face: stands in for recent query history.
-const historyIcon = (
-	<svg
-		viewBox="0 0 24 24"
-		width="24"
-		height="24"
-		aria-hidden="true"
-		focusable="false"
-	>
-		<g
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.3"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<circle cx="12" cy="12" r="8.5" />
-			<path d="M12 7.5V12l3 2" />
-		</g>
-	</svg>
-);
-
 // Set by the mounted controller; let palette commands open our modals.
 let openFlow = null;
 let openHistory = null;
@@ -152,7 +130,7 @@ export function init() {
 		commands.registerCommand( {
 			name: 'woobert/history',
 			label: 'Woobert: Query history',
-			icon: historyIcon,
+			icon: woobertIcon,
 			callback: ( { close } ) => {
 				close();
 				if ( openHistory ) {
