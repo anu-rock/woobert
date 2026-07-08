@@ -75,9 +75,7 @@ function CallPreview( { call } ) {
 function DisplayView( { display } ) {
 	if ( display.type === 'list' ) {
 		if ( ! display.rows.length ) {
-			return (
-				<p className="woobert-result-summary">{ display.empty }</p>
-			);
+			return <p className="woobert-result-summary">{ display.empty }</p>;
 		}
 		return (
 			<div className="woobert-result">
@@ -181,7 +179,9 @@ function DebugInfo( { call, result, error, response } ) {
 						HTTP status: { result.status }
 					</p>
 				) }
-				{ error && <p className="woobert-debug-line">Error: { error }</p> }
+				{ error && (
+					<p className="woobert-debug-line">Error: { error }</p>
+				) }
 			</div>
 		</details>
 	);
@@ -197,16 +197,24 @@ function DebugInfo( { call, result, error, response } ) {
 export function WoobertFlowModal( { query, onClose } ) {
 	const [ flow, setFlow ] = useState( { phase: 'resolving' } );
 
-	const doExecute = useCallback( async ( call ) => {
-		setFlow( { phase: 'executing', call } );
-		try {
-			const result = await execute( call );
-			setFlow( { phase: 'done', call, result } );
-		} catch ( e ) {
-			// e.data is the executor result body (status, request) on a failed run.
-			setFlow( { phase: 'error', error: e.message, call, result: e.data } );
-		}
-	}, [] );
+	const doExecute = useCallback(
+		async ( call ) => {
+			setFlow( { phase: 'executing', call } );
+			try {
+				const result = await execute( call, query );
+				setFlow( { phase: 'done', call, result } );
+			} catch ( e ) {
+				// e.data is the executor result body (status, request) on a failed run.
+				setFlow( {
+					phase: 'error',
+					error: e.message,
+					call,
+					result: e.data,
+				} );
+			}
+		},
+		[ query ]
+	);
 
 	// Kick off resolution whenever the query changes.
 	useEffect( () => {

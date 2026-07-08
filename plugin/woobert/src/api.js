@@ -9,21 +9,23 @@
  * Read the runtime config injected by wp_localize_script.
  */
 export function config() {
-	return typeof woobert !== 'undefined' ? woobert : { root: '', nonce: '', context: {} };
+	return typeof woobert !== 'undefined'
+		? woobert
+		: { root: '', nonce: '', context: {} };
 }
 
 /**
- * POST helper that attaches the REST nonce.
+ * Fetch helper that attaches the REST nonce and normalizes errors.
  */
-async function post( path, payload ) {
+async function request( path, { method = 'GET', payload } = {} ) {
 	const { root, nonce } = config();
 	const res = await fetch( `${ root }${ path }`, {
-		method: 'POST',
+		method,
 		headers: {
 			'Content-Type': 'application/json',
 			'X-WP-Nonce': nonce,
 		},
-		body: JSON.stringify( payload ),
+		body: payload !== undefined ? JSON.stringify( payload ) : undefined,
 	} );
 
 	let data = null;
@@ -49,6 +51,13 @@ async function post( path, payload ) {
 }
 
 /**
+ * POST helper that attaches the REST nonce.
+ */
+function post( path, payload ) {
+	return request( path, { method: 'POST', payload } );
+}
+
+/**
  * Ask Woobert to translate a natural-language query into tool call(s). No execution.
  *
  * @param {string} query Merchant's request.
@@ -62,9 +71,32 @@ export function resolve( query ) {
 /**
  * Execute a single resolved tool call against WooCommerce.
  *
- * @param {{name:string, arguments:object}} call The tool call to run.
+ * @param {{name:string, arguments:object}} call  The tool call to run.
+ * @param {string}                          query The utterance that produced it (logged to history).
  * @return {Promise<object>} Executor result { ok, status, data, request }.
  */
-export function execute( call ) {
-	return post( '/execute', { name: call.name, arguments: call.arguments } );
+export function execute( call, query = '' ) {
+	return post( '/execute', {
+		name: call.name,
+		arguments: call.arguments,
+		query,
+	} );
+}
+
+/**
+ * Fetch the current user's executed-command history, newest first.
+ *
+ * @return {Promise<{ok:boolean, entries:Array}>} Recorded entries.
+ */
+export function history() {
+	return request( '/history' );
+}
+
+/**
+ * Clear the current user's history.
+ *
+ * @return {Promise<{ok:boolean, entries:Array}>} The now-empty history.
+ */
+export function clearHistory() {
+	return post( '/history/clear', {} );
 }

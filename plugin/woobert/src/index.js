@@ -12,6 +12,7 @@ import { store as commandsStore } from '@wordpress/commands';
 import { dispatch } from '@wordpress/data';
 import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
 import { WoobertFlowModal } from './flow';
+import { WoobertHistoryModal } from './history';
 import './style.css';
 
 // Inline icon (avoids pulling in the bundled @wordpress/icons package).
@@ -47,8 +48,31 @@ const woobertIcon = (
 	</svg>
 );
 
-// Set by the mounted controller; lets a palette command open the flow modal.
+// A simple clock face: stands in for recent query history.
+const historyIcon = (
+	<svg
+		viewBox="0 0 24 24"
+		width="24"
+		height="24"
+		aria-hidden="true"
+		focusable="false"
+	>
+		<g
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.3"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<circle cx="12" cy="12" r="8.5" />
+			<path d="M12 7.5V12l3 2" />
+		</g>
+	</svg>
+);
+
+// Set by the mounted controller; let palette commands open our modals.
 let openFlow = null;
+let openHistory = null;
 
 /**
  * Command loader: reflects the current palette search into an "Ask Woobert"
@@ -83,24 +107,30 @@ function useAskWoobertCommands( { search } ) {
 }
 
 /**
- * Invisible root that owns the flow modal and exposes openFlow to palette commands.
+ * Invisible root that owns Woobert's modals and exposes openers to palette
+ * commands. Only one modal is shown at a time (`view` holds which, plus its data).
  */
 function PaletteController() {
-	const [ query, setQuery ] = useState( null );
+	const [ view, setView ] = useState( null );
 
 	useEffect( () => {
-		openFlow = ( q ) => setQuery( q );
+		openFlow = ( q ) => setView( { type: 'ask', query: q } );
+		openHistory = () => setView( { type: 'history' } );
 		return () => {
 			openFlow = null;
+			openHistory = null;
 		};
 	}, [] );
 
-	if ( query === null ) {
-		return null;
+	const close = () => setView( null );
+
+	if ( view?.type === 'ask' ) {
+		return <WoobertFlowModal query={ view.query } onClose={ close } />;
 	}
-	return (
-		<WoobertFlowModal query={ query } onClose={ () => setQuery( null ) } />
-	);
+	if ( view?.type === 'history' ) {
+		return <WoobertHistoryModal onClose={ close } />;
+	}
+	return null;
 }
 
 /**
@@ -116,6 +146,21 @@ export function init() {
 		name: 'woobert/ask',
 		hook: useAskWoobertCommands,
 	} );
+
+	// A static command, always listed in the palette, that opens the history modal.
+	if ( commands.registerCommand ) {
+		commands.registerCommand( {
+			name: 'woobert/history',
+			label: 'Woobert: Query history',
+			icon: historyIcon,
+			callback: ( { close } ) => {
+				close();
+				if ( openHistory ) {
+					openHistory();
+				}
+			},
+		} );
+	}
 
 	const container = document.createElement( 'div' );
 	container.id = 'woobert-palette-root';

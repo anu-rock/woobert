@@ -45,6 +45,26 @@ class Woobert_Rest_Proxy {
 						'callback'            => array( $this, 'execute' ),
 					)
 				);
+
+				register_rest_route(
+					'woobert/v1',
+					'/history',
+					array(
+						'methods'             => 'GET',
+						'permission_callback' => array( $this, 'can_manage' ),
+						'callback'            => array( $this, 'history' ),
+					)
+				);
+
+				register_rest_route(
+					'woobert/v1',
+					'/history/clear',
+					array(
+						'methods'             => 'POST',
+						'permission_callback' => array( $this, 'can_manage' ),
+						'callback'            => array( $this, 'clear_history' ),
+					)
+				);
 			}
 		);
 	}
@@ -99,6 +119,7 @@ class Woobert_Rest_Proxy {
 	public function execute( WP_REST_Request $request ) {
 		$name      = (string) $request->get_param( 'name' );
 		$arguments = (array) ( $request->get_param( 'arguments' ) ?? array() );
+		$query     = trim( (string) $request->get_param( 'query' ) );
 
 		if ( '' === $name ) {
 			return new WP_REST_Response( array( 'ok' => false, 'error' => __( 'Missing tool name.', 'woobert' ) ), 400 );
@@ -107,7 +128,57 @@ class Woobert_Rest_Proxy {
 		$result = ( new Woobert_Executor() )->run( $name, $arguments );
 		$status = $result['ok'] ? 200 : ( $result['status'] ?: 500 );
 
+		Woobert_History::record(
+			array(
+				'query'   => $query,
+				'tool'    => $name,
+				'request' => $result['request'] ?? array(
+					'method' => '',
+					'route'  => '',
+					'params' => $arguments,
+				),
+				'status'  => $result['status'] ?? $status,
+				'ok'      => (bool) $result['ok'],
+				'error'   => $result['ok'] ? '' : self::error_message( $result ),
+			)
+		);
+
 		return new WP_REST_Response( $result, $status );
+	}
+
+	/**
+	 * Return the current user's executed-command history.
+	 */
+	public function history( WP_REST_Request $request ) {
+		return new WP_REST_Response( array( 'ok' => true, 'entries' => Woobert_History::all() ), 200 );
+	}
+
+	/**
+	 * Clear the current user's history.
+	 */
+	public function clear_history( WP_REST_Request $request ) {
+		Woobert_History::clear();
+		return new WP_REST_Response( array( 'ok' => true, 'entries' => array() ), 200 );
+	}
+
+	/**
+	 * Pull a human-readable error message out of a failed executor result. The
+	 * real WooCommerce message is nested in the error body it returns as `data`.
+	 */
+	private static function error_message( array $result ): string {
+		if ( ! empty( $result['error'] ) ) {
+			return (string) $result['error'];
+		}
+		$data = $result['data'] ?? null;
+		if ( is_array( $data ) ) {
+			if ( isset( $data['message'] ) ) {
+				return (string) $data['message'];
+			}
+			if ( isset( $data['data']['message'] ) ) {
+				return (string) $data['data']['message'];
+			}
+		}
+		return sprintf( 'HTTP %d', (int) ( $result['status'] ?? 0 ) );
 	}
 
 	/**

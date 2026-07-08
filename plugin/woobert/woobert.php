@@ -30,6 +30,7 @@ define( 'WOOBERT_URL', plugin_dir_url( __FILE__ ) );
 require_once WOOBERT_PATH . 'includes/class-tools.php';
 require_once WOOBERT_PATH . 'includes/class-executor.php';
 require_once WOOBERT_PATH . 'includes/class-fern-client.php';
+require_once WOOBERT_PATH . 'includes/class-history.php';
 require_once WOOBERT_PATH . 'includes/class-rest-proxy.php';
 require_once WOOBERT_PATH . 'includes/class-settings.php';
 
