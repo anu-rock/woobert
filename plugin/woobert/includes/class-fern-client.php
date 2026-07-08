@@ -41,7 +41,6 @@ class Woobert_Fern_Client {
 		// The project model owns the tool set; we send the utterance (with context
 		// folded in so "this order/product" resolves) plus context as meta.
 		$body = array(
-			// 'utterance' => self::compose_prompt( $query, $context ),
 			'utterance' => $query,
 			'meta'      => (object) $context,
 		);
