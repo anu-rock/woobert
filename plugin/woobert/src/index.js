@@ -15,6 +15,7 @@ import { WoobertFlowModal } from './flow';
 import './style.css';
 
 // Inline icon (avoids pulling in the bundled @wordpress/icons package).
+// A friendly owl helper: ear tufts, wide bespectacled eyes, small beak, feet.
 const woobertIcon = (
 	<svg
 		viewBox="0 0 24 24"
@@ -23,10 +24,26 @@ const woobertIcon = (
 		aria-hidden="true"
 		focusable="false"
 	>
-		<path
-			fill="currentColor"
-			d="M12 3c-3.9 0-7 2.8-7 6.3 0 2.2 1.2 4.1 3 5.3V19a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4.4c1.8-1.2 3-3.1 3-5.3C19 5.8 15.9 3 12 3Zm-2 8.5a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Zm4 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4Z"
-		/>
+		<g
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.3"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			{ /* Ear tufts */ }
+			<path d="M8 5.5 9.5 7.5M16 5.5 14.5 7.5" />
+			{ /* Body */ }
+			<ellipse cx="12" cy="13" rx="6.5" ry="7" />
+			{ /* Eyes */ }
+			<circle cx="9.5" cy="11" r="1.9" />
+			<circle cx="14.5" cy="11" r="1.9" />
+			<path d="M11.6 11h.8" />
+			{ /* Beak */ }
+			<path d="M11.1 12.6 12.9 12.6 12 14Z" />
+			{ /* Feet */ }
+			<path d="M10 20v1.2M14 20v1.2" />
+		</g>
 	</svg>
 );
 
