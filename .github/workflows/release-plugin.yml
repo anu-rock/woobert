@@ -1,0 +1,67 @@
+name: Release plugin zip
+
+# Builds the Woobert plugin zip and publishes it as a GitHub Release asset.
+# Run on demand from the Actions tab (or `gh workflow run`). The resulting
+# asset URL is what the WordPress Playground blueprint points at.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v0.1.0). Created if it does not exist."
+        required: true
+        default: v0.1.0
+      prerelease:
+        description: "Mark the release as a pre-release"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: plugin/woobert/package-lock.json
+
+      - name: Install dependencies
+        working-directory: plugin/woobert
+        run: npm ci
+
+      - name: Build front-end bundle
+        working-directory: plugin/woobert
+        run: npm run build
+
+      # Stage only the files that ship in the plugin. The zip has a single
+      # top-level `woobert/` folder so it installs under that slug.
+      - name: Assemble plugin directory
+        run: |
+          mkdir -p dist/woobert
+          cp -R \
+            plugin/woobert/woobert.php \
+            plugin/woobert/tools.json \
+            plugin/woobert/readme.txt \
+            plugin/woobert/includes \
+            plugin/woobert/build \
+            dist/woobert/
+
+      - name: Create zip
+        working-directory: dist
+        run: zip -r ../woobert.zip woobert
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }}
+          prerelease: ${{ inputs.prerelease }}
+          files: woobert.zip
+          fail_on_unmatched_files: true
