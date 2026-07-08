@@ -296,7 +296,7 @@
         }
       },
       "x-woo": {
-        "method": "POST", "path": "/products", "path_params": [], "confirm": false,
+        "method": "POST", "path": "/products", "path_params": [], "confirm": true,
         "display": {
           "type": "object",
           "title": "Product created",
@@ -457,7 +457,7 @@
         }
       },
       "x-woo": {
-        "method": "POST", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": false,
+        "method": "POST", "path": "/products/{product_id}/variations", "path_params": ["product_id"], "confirm": true,
         "display": {
           "type": "object",
           "title": "Variation created",
@@ -647,7 +647,7 @@
         }
       },
       "x-woo": {
-        "method": "POST", "path": "/coupons", "path_params": [], "confirm": false,
+        "method": "POST", "path": "/coupons", "path_params": [], "confirm": true,
         "display": {
           "type": "object",
           "title": "Coupon created",
@@ -775,7 +775,7 @@
         }
       },
       "x-woo": {
-        "method": "POST", "path": "/products/categories", "path_params": [], "confirm": false,
+        "method": "POST", "path": "/products/categories", "path_params": [], "confirm": true,
         "display": {
           "type": "object",
           "title": "Category created",
@@ -889,7 +889,7 @@
         }
       },
       "x-woo": {
-        "method": "POST", "path": "/products/tags", "path_params": [], "confirm": false,
+        "method": "POST", "path": "/products/tags", "path_params": [], "confirm": true,
         "display": {
           "type": "object",
           "title": "Tag created",
