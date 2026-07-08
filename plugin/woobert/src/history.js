@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useCallback, Fragment } from '@wordpress/element';
-import { history as fetchHistory, clearHistory } from './api';
+import { history as fetchHistory } from './api';
 
 /**
  * Format a unix timestamp (seconds) as a short local date-time string.
@@ -124,15 +124,6 @@ export function WoobertHistoryModal( { onClose } ) {
 		load();
 	}, [ load ] );
 
-	const doClear = useCallback( async () => {
-		try {
-			await clearHistory();
-			setState( { phase: 'ready', entries: [] } );
-		} catch ( e ) {
-			setState( { phase: 'error', error: e.message } );
-		}
-	}, [] );
-
 	// Esc closes the modal.
 	useEffect( () => {
 		const onKey = ( e ) => {
@@ -156,17 +147,7 @@ export function WoobertHistoryModal( { onClose } ) {
 			} }
 		>
 			<div className="woobert-animator">
-				<div className="woobert-flow-head woobert-history-head">
-					<span>Woobert history</span>
-					{ state.phase === 'ready' && entries.length > 0 && (
-						<button
-							className="woobert-btn woobert-history-clear"
-							onClick={ doClear }
-						>
-							Clear
-						</button>
-					) }
-				</div>
+				<div className="woobert-flow-head">Woobert history</div>
 				<div className="woobert-panel">
 					{ state.phase === 'loading' && (
 						<p className="woobert-status">Loading…</p>

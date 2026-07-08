@@ -34,6 +34,9 @@ require_once WOOBERT_PATH . 'includes/class-history.php';
 require_once WOOBERT_PATH . 'includes/class-rest-proxy.php';
 require_once WOOBERT_PATH . 'includes/class-settings.php';
 
+// Create the history table on activation (and lazily on upgrade, see below).
+register_activation_hook( __FILE__, array( 'Woobert_History', 'install' ) );
+
 /**
  * Boot the plugin once all plugins are loaded, so we can detect WooCommerce.
  */
@@ -50,6 +53,7 @@ add_action(
 			return;
 		}
 
+		Woobert_History::maybe_install();
 		Woobert_Settings::init();
 		( new Woobert_Rest_Proxy() )->register();
 	}

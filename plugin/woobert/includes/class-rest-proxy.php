@@ -55,16 +55,6 @@ class Woobert_Rest_Proxy {
 						'callback'            => array( $this, 'history' ),
 					)
 				);
-
-				register_rest_route(
-					'woobert/v1',
-					'/history/clear',
-					array(
-						'methods'             => 'POST',
-						'permission_callback' => array( $this, 'can_manage' ),
-						'callback'            => array( $this, 'clear_history' ),
-					)
-				);
 			}
 		);
 	}
@@ -150,15 +140,7 @@ class Woobert_Rest_Proxy {
 	 * Return the current user's executed-command history.
 	 */
 	public function history( WP_REST_Request $request ) {
-		return new WP_REST_Response( array( 'ok' => true, 'entries' => Woobert_History::all() ), 200 );
-	}
-
-	/**
-	 * Clear the current user's history.
-	 */
-	public function clear_history( WP_REST_Request $request ) {
-		Woobert_History::clear();
-		return new WP_REST_Response( array( 'ok' => true, 'entries' => array() ), 200 );
+		return new WP_REST_Response( array( 'ok' => true, 'entries' => Woobert_History::recent() ), 200 );
 	}
 
 	/**

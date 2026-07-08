@@ -91,12 +91,3 @@ export function execute( call, query = '' ) {
 export function history() {
 	return request( '/history' );
 }
-
-/**
- * Clear the current user's history.
- *
- * @return {Promise<{ok:boolean, entries:Array}>} The now-empty history.
- */
-export function clearHistory() {
-	return post( '/history/clear', {} );
-}

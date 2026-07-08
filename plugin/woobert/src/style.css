@@ -225,17 +225,6 @@
 
 /* --- Query history modal --- */
 
-.woobert-history-head {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-}
-
-.woobert-history-clear {
-	padding: 4px 12px;
-	font-size: 12px;
-}
-
 .woobert-history-list {
 	margin: 0;
 	padding: 0;

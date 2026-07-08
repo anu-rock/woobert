@@ -124,7 +124,81 @@ class Woobert_Settings {
 				</table>
 				<?php submit_button(); ?>
 			</form>
+			<?php self::render_history(); ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the store-wide audit log: every Woobert command any admin has run,
+	 * newest first, with the request, outcome, arguments, and any error.
+	 */
+	public static function render_history(): void {
+		$entries = Woobert_History::all();
+		?>
+		<h2><?php esc_html_e( 'Command history', 'woobert' ); ?></h2>
+		<p class="description">
+			<?php esc_html_e( 'Every command run through Woobert, across all admins. Newest first.', 'woobert' ); ?>
+		</p>
+		<?php if ( empty( $entries ) ) : ?>
+			<p><?php esc_html_e( 'No commands recorded yet.', 'woobert' ); ?></p>
+			<?php return; ?>
+		<?php endif; ?>
+		<table class="widefat striped">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Time', 'woobert' ); ?></th>
+					<th><?php esc_html_e( 'User', 'woobert' ); ?></th>
+					<th><?php esc_html_e( 'Query', 'woobert' ); ?></th>
+					<th><?php esc_html_e( 'Request', 'woobert' ); ?></th>
+					<th><?php esc_html_e( 'Result', 'woobert' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				$names = array();
+				foreach ( $entries as $entry ) :
+					$user_id = $entry['user_id'];
+					if ( ! isset( $names[ $user_id ] ) ) {
+						$user              = $user_id ? get_userdata( $user_id ) : null;
+						$names[ $user_id ] = $user ? $user->display_name : sprintf( '#%d', $user_id );
+					}
+					$method = $entry['request']['method'] ?? '';
+					$route  = $entry['request']['route'] ?? '';
+					$params = $entry['request']['params'] ?? array();
+					?>
+					<tr>
+						<td><?php echo esc_html( wp_date( 'Y-m-d H:i', $entry['time'] ) ); ?></td>
+						<td><?php echo esc_html( $names[ $user_id ] ); ?></td>
+						<td><?php echo $entry['query'] ? esc_html( $entry['query'] ) : '<em>&mdash;</em>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal fallback markup. ?></td>
+						<td>
+							<code><?php echo esc_html( trim( $method . ' ' . $route ) ); ?></code>
+							<?php if ( ! empty( $params ) ) : ?>
+								<details>
+									<summary><?php esc_html_e( 'Arguments', 'woobert' ); ?></summary>
+									<pre style="white-space:pre-wrap;margin:6px 0 0;"><?php echo esc_html( (string) wp_json_encode( $params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
+								</details>
+							<?php endif; ?>
+						</td>
+						<td>
+							<?php if ( $entry['ok'] ) : ?>
+								<span style="color:#207b28;font-weight:600;"><?php esc_html_e( 'Success', 'woobert' ); ?></span>
+							<?php else : ?>
+								<span style="color:#b32d2e;font-weight:600;">
+									<?php
+									/* translators: %d: HTTP status code. */
+									echo esc_html( $entry['status'] ? sprintf( __( 'Failed (%d)', 'woobert' ), $entry['status'] ) : __( 'Failed', 'woobert' ) );
+									?>
+								</span>
+								<?php if ( $entry['error'] ) : ?>
+									<div class="description"><?php echo esc_html( $entry['error'] ); ?></div>
+								<?php endif; ?>
+							<?php endif; ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 		<?php
 	}
 }
