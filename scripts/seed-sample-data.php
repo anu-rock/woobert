@@ -1,17 +1,42 @@
 <?php
 /**
- * Seeds a realistic WooCommerce sample dataset for local development:
- * categories, simple products, one variable product with variations, customers,
- * orders in a few statuses, product reviews, and a coupon.
+ * Seeds a realistic WooCommerce sample dataset: categories, simple products,
+ * one variable product with variations, customers, orders in a few statuses,
+ * product reviews, and a coupon. Idempotent by SKU / email / code, safe to re-run.
  *
- * Idempotent by SKU / email / code, safe to re-run. Invoked via:
- *   docker compose run --rm --entrypoint wp wpcli eval-file /scripts/seed-sample-data.php
+ * Single source of truth for two environments:
+ *   - Local dev via WP-CLI (WordPress already bootstrapped):
+ *       docker compose run --rm --entrypoint wp wpcli eval-file /scripts/seed-sample-data.php
+ *   - WordPress Playground, fetched into the VFS and required by blueprint/blueprint.json
+ *     (see that file's writeFile + runPHP steps).
  *
  * @package Woobert
  */
 
-if ( ! defined( 'ABSPATH' ) || ! class_exists( 'WooCommerce' ) ) {
-	WP_CLI::error( 'WooCommerce must be active.' );
+// Playground's runPHP starts with no WordPress loaded; WP-CLI eval-file already did.
+if ( ! defined( 'ABSPATH' ) ) {
+	require_once '/wordpress/wp-load.php';
+}
+
+if ( ! class_exists( 'WooCommerce' ) ) {
+	if ( class_exists( 'WP_CLI' ) ) {
+		WP_CLI::error( 'WooCommerce must be active.' );
+	}
+	return;
+}
+
+// A fresh WooCommerce activation sets a one-time redirect transient that fires on the
+// next admin request. Under Playground it would bounce the blueprint's landingPage to
+// the WooCommerce home screen instead of Woobert, so clear it. Harmless under WP-CLI.
+delete_transient( '_wc_activation_redirect' );
+
+/**
+ * Log a line only when running under WP-CLI; stays silent in Playground.
+ */
+function woobert_seed_log( string $message ): void {
+	if ( class_exists( 'WP_CLI' ) ) {
+		WP_CLI::log( $message );
+	}
 }
 
 /**
@@ -168,9 +193,9 @@ if ( empty( $existing_orders ) ) {
 		$order->set_status( $plan['status'] );
 		$order->save();
 	}
-	WP_CLI::log( 'Created ' . count( $order_plan ) . ' orders.' );
+	woobert_seed_log( 'Created ' . count( $order_plan ) . ' orders.' );
 } else {
-	WP_CLI::log( 'Orders already present, skipping order seed.' );
+	woobert_seed_log( 'Orders already present, skipping order seed.' );
 }
 
 // --- Reviews ----------------------------------------------------------------
@@ -216,8 +241,8 @@ if ( ! wc_get_coupon_id_by_code( 'WELCOME10' ) ) {
 	$coupon->set_code( 'WELCOME10' );
 	$coupon->set_discount_type( 'percent' );
 	$coupon->set_amount( 10 );
-	$coupon->set_description( 'Welcome 10% off, seeded for local development.' );
+	$coupon->set_description( 'Welcome 10% off, seeded sample data.' );
 	$coupon->save();
 }
 
-WP_CLI::success( 'Sample data seeded.' );
+woobert_seed_log( 'Sample data seeded.' );
