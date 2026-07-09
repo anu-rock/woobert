@@ -59,6 +59,13 @@
 	color: #e0736b;
 }
 
+.woobert-confirm-message {
+	margin: 0 0 4px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #eef1f3;
+}
+
 .woobert-call-name {
 	display: inline-block;
 	padding: 3px 8px;

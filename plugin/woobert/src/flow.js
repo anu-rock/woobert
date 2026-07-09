@@ -68,6 +68,46 @@ function CallPreview( { call } ) {
 }
 
 /**
+ * Reduce a tool's training description to a short, merchant-facing action
+ * phrase: the first sentence, before the "Use for ..." examples, with any
+ * parenthetical aside and trailing period trimmed. Empty when unavailable.
+ */
+function actionPhrase( call ) {
+	const desc = ( call.description || '' ).trim();
+	if ( ! desc ) {
+		return '';
+	}
+	return desc
+		.split( /\.\s*Use for/i )[ 0 ]
+		.replace( /\s*\([^)]*\)/g, '' )
+		.replace( /\.+$/, '' )
+		.trim();
+}
+
+/**
+ * Plain-English, non-technical sentence describing the write a confirm-flagged
+ * tool will perform, so merchants aren't asked to reason about tool names.
+ *
+ * @param {Object}  props
+ * @param {Object}  props.call   The resolved tool call (carries `description`).
+ * @param {boolean} props.prompt Append the "Do you want to run it?" question.
+ */
+function ConfirmMessage( { call, prompt } ) {
+	const phrase = actionPhrase( call );
+	const sentence = phrase
+		? `This will ${ phrase.charAt( 0 ).toLowerCase() }${ phrase.slice(
+				1
+		  ) }, which adds or updates data in your store.`
+		: 'This will add or update data in your store.';
+	return (
+		<p className="woobert-confirm-message">
+			{ sentence }
+			{ prompt ? ' Do you want to run it?' : '' }
+		</p>
+	);
+}
+
+/**
  * Renders a tool's merchant-facing display payload (built server-side by the
  * executor): a labeled field list for a single object, or a column table for a
  * list. Falls back to a friendly empty message when a list has no rows.
@@ -288,7 +328,16 @@ export function WoobertFlowModal( { query, onClose } ) {
 										? 'Running…'
 										: 'Confirm this action' }
 								</p>
-								<CallPreview call={ flow.call } />
+								<ConfirmMessage
+									call={ flow.call }
+									prompt={ flow.phase === 'confirm' }
+								/>
+								<details className="woobert-debug">
+									<summary>Technical details</summary>
+									<div className="woobert-debug-body">
+										<CallPreview call={ flow.call } />
+									</div>
+								</details>
 								{ flow.phase === 'confirm' && (
 									<div className="woobert-actions">
 										<button
