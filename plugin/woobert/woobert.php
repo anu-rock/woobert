@@ -3,7 +3,7 @@
  * Plugin Name:       Woobert
  * Plugin URI:        https://woobert.fernfly.com
  * Description:       Agentic command bar for WooCommerce merchants. Get stuff done at the speed of thought.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 7.0
  * Requires PHP:      8.0
  * Author:            Fernfly
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'WOOBERT_VERSION', '0.1.0' );
+define( 'WOOBERT_VERSION', '0.1.1' );
 define( 'WOOBERT_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WOOBERT_URL', plugin_dir_url( __FILE__ ) );
 
