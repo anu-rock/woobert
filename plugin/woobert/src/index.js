@@ -52,6 +52,9 @@ const woobertIcon = (
 let openFlow = null;
 let openHistory = null;
 
+// Bumped on each flow open so the modal remounts fresh per query (see below).
+let flowSeq = 0;
+
 /**
  * Command loader: reflects the current palette search into an "Ask Woobert"
  * command. The palette calls this hook with the live `search` text.
@@ -92,7 +95,8 @@ function PaletteController() {
 	const [ view, setView ] = useState( null );
 
 	useEffect( () => {
-		openFlow = ( q ) => setView( { type: 'ask', query: q } );
+		openFlow = ( q ) =>
+			setView( { type: 'ask', query: q, seq: ++flowSeq } );
 		openHistory = () => setView( { type: 'history' } );
 		return () => {
 			openFlow = null;
@@ -103,7 +107,15 @@ function PaletteController() {
 	const close = () => setView( null );
 
 	if ( view?.type === 'ask' ) {
-		return <WoobertFlowModal query={ view.query } onClose={ close } />;
+		// key on seq: a fresh mount per open, so a new query never briefly shows
+		// the previous query's result while the next one resolves.
+		return (
+			<WoobertFlowModal
+				key={ view.seq }
+				query={ view.query }
+				onClose={ close }
+			/>
+		);
 	}
 	if ( view?.type === 'history' ) {
 		return <WoobertHistoryModal onClose={ close } />;
