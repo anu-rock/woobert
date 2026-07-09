@@ -333,7 +333,7 @@
         }
       },
       "x-woo": {
-        "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false,
+        "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": true,
         "display": {
           "type": "object",
           "title": "Product updated",
@@ -364,7 +364,7 @@
         }
       },
       "x-woo": {
-        "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": false,
+        "method": "PUT", "path": "/products/{id}", "path_params": ["id"], "confirm": true,
         "display": {
           "type": "object",
           "title": "Stock updated",
@@ -713,7 +713,7 @@
         }
       },
       "x-woo": {
-        "method": "PUT", "path": "/coupons/{id}", "path_params": ["id"], "confirm": false,
+        "method": "PUT", "path": "/coupons/{id}", "path_params": ["id"], "confirm": true,
         "display": {
           "type": "object",
           "title": "Coupon updated",
