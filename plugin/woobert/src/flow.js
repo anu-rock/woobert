@@ -328,10 +328,12 @@ export function WoobertFlowModal( { query, onClose } ) {
 										? 'Running…'
 										: 'Confirm this action' }
 								</p>
-								<ConfirmMessage
-									call={ flow.call }
-									prompt={ flow.phase === 'confirm' }
-								/>
+								{ flow.call.confirm && (
+									<ConfirmMessage
+										call={ flow.call }
+										prompt={ flow.phase === 'confirm' }
+									/>
+								) }
 								<details className="woobert-debug">
 									<summary>Technical details</summary>
 									<div className="woobert-debug-body">
