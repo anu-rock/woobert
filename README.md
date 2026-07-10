@@ -173,7 +173,7 @@ Keep the set focused. It is deliberately capped at ~28 tools covering core journ
 | `blueprint/`                   | WordPress Playground blueprint for a zero-install browser demo.                                      |
 | `docker-compose.yml`           | Pinned WordPress + MariaDB + WP-CLI for local dev. The wpcli service auto-provisions the stack.      |
 | `scripts/setup.sh`             | Runs in the wpcli container: installs WP + WooCommerce, seeds sample data, mints REST API keys. Idempotent. |
-| `scripts/seed-sample-data.php` | Products, a variable product, orders, customers, reviews, a coupon. Shared by local dev and the blueprint demo. |
+| `scripts/seed-sample-data.php` | Products, a variable product, orders across 90 days and every status, refunds, customers, reviews, coupons, plus a refund-capable sample gateway. Idempotent. Shared by local dev and the blueprint demo. |
 | `scripts/generate-api-key.php` | Mints a WooCommerce REST consumer key/secret for external testing.                                   |
 
 ## The tool set

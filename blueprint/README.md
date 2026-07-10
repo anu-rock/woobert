@@ -6,9 +6,12 @@ One click gives you:
 
 1. A fresh WordPress site (auto-logged-in as admin).
 2. WooCommerce installed and activated.
-3. Sample products, a variable product, customers, orders, reviews, and a coupon.
-   The blueprint fetches [`scripts/seed-sample-data.php`](../scripts/seed-sample-data.php)
-   into the site and runs it, so the demo store and local dev share one seeder.
+3. Sample products, a variable product, customers and guests, 12 orders spread over the
+   last three months in every status, refunds, reviews, and two coupons. The blueprint
+   fetches [`scripts/seed-sample-data.php`](../scripts/seed-sample-data.php) into the site
+   and runs it, so the demo store and local dev share one seeder. The seeder also installs
+   a sample payment gateway as a must-use plugin, because no core WooCommerce gateway
+   supports automatic refunds and the refund journeys would otherwise fail.
 4. Woobert installed and activated.
 5. You land on the Woobert settings page (**WooCommerce -> Woobert**).
 
