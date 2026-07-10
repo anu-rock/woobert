@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.1](https://github.com/anu-rock/woobert/compare/v0.1.0...v0.1.1) (2026-07-09)
+## [0.1.1](https://github.com/antelligent-org/woobert/compare/v0.1.0...v0.1.1) (2026-07-09)
 
 ### Features
 
