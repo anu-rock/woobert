@@ -4,7 +4,7 @@ Tags: woocommerce, ai, command-bar, productivity, merchant-experience
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,16 @@ Woobert is powered by Fern, a family of small function-calling models by Fernfly
 4. Press Cmd/Ctrl-K in wp-admin.
 
 == Changelog ==
+
+= 0.1.2 =
+
+**Bug Fixes**
+
+* make sample data consistent and refundable
+
+**Documentation**
+
+* use the canonical repo owner in the changelog compare link
 
 = 0.1.1 =
 
