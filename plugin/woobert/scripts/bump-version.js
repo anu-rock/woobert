@@ -7,9 +7,12 @@
  *   npm run bump -- patch|minor|major
  *
  * Touches: woobert.php (header + WOOBERT_VERSION), package.json, readme.txt
- * (Stable tag), and ../../blueprint/blueprint.json (release download URL).
- * Each edit is a targeted regex so surrounding formatting is preserved; the run
- * aborts if any expected version marker is missing, so partial bumps can't ship.
+ * (Stable tag), and ../../version.txt. Each edit is a targeted regex so
+ * surrounding formatting is preserved; the run aborts if any expected version
+ * marker is missing, so partial bumps can't ship.
+ *
+ * The release workflow calls this with an explicit version from release-please;
+ * running it by hand remains a supported escape hatch.
  */
 
 'use strict';
@@ -83,9 +86,9 @@ function edits(version) {
 			next: version,
 		},
 		{
-			label: 'blueprint.json (release URL)',
-			file: path.join(repoRoot, 'blueprint', 'blueprint.json'),
-			re: /(releases\/download\/v)(\d+\.\d+\.\d+)(\/woobert\.zip)/,
+			label: 'version.txt',
+			file: path.join(repoRoot, 'version.txt'),
+			re: /^()(\d+\.\d+\.\d+)(\s*)$/m,
 			next: version,
 		},
 	];
@@ -95,12 +98,18 @@ function main() {
 	const from = currentVersion();
 	const to = resolveVersion(process.argv[2], from);
 
-	if (to === from) {
-		console.log(`Already at ${to}; nothing to do.`);
+	const planned = edits(to);
+
+	// package.json alone matching `to` isn't enough: a half-applied bump (or a
+	// re-run against a partly-synced release branch) must still be completed.
+	const settled = planned.every((edit) => {
+		const match = fs.readFileSync(edit.file, 'utf8').match(edit.re);
+		return match && match[2] === to;
+	});
+	if (settled) {
+		console.log(`Already at ${to} everywhere; nothing to do.`);
 		return;
 	}
-
-	const planned = edits(to);
 
 	// Validate every marker first so a bad match never leaves files half-bumped.
 	for (const edit of planned) {

@@ -1,0 +1,106 @@
+name: Release
+
+# Conventional-commit driven releases. Pushing to main keeps a "chore: release
+# x.y.z" PR up to date; merging that PR tags the release and publishes the
+# plugin zip that the Playground blueprint installs.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_branch: ${{ steps.release.outputs.pr && fromJSON(steps.release.outputs.pr).headBranchName || '' }}
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  # release-please updates version.txt and CHANGELOG.md; the plugin carries the
+  # version in three more places it can't reach (WordPress header fields reject
+  # its inline annotations), so we amend its branch with a scripted sync.
+  sync-plugin-version:
+    needs: release-please
+    if: needs.release-please.outputs.pr_branch != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.pr_branch }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sync version markers and readme changelog
+        run: |
+          version="$(jq -r '.["."]' .release-please-manifest.json)"
+          node plugin/woobert/scripts/bump-version.js "$version"
+          node scripts/sync-readme-changelog.js "$version"
+
+      - name: Commit to the release PR
+        run: |
+          if git diff --quiet; then
+            echo "Plugin version markers already in sync."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: sync plugin version markers"
+          git push
+
+  # Runs only on the push created by merging the release PR.
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: plugin/woobert/package-lock.json
+
+      - name: Install dependencies
+        working-directory: plugin/woobert
+        run: npm ci
+
+      - name: Build front-end bundle
+        working-directory: plugin/woobert
+        run: npm run build
+
+      # Stage only the files that ship in the plugin. The zip has a single
+      # top-level `woobert/` folder so it installs under that slug.
+      - name: Assemble plugin directory
+        run: |
+          mkdir -p dist/woobert
+          cp -R \
+            plugin/woobert/woobert.php \
+            plugin/woobert/tools.json \
+            plugin/woobert/readme.txt \
+            plugin/woobert/includes \
+            plugin/woobert/build \
+            dist/woobert/
+
+      - name: Create zip
+        working-directory: dist
+        run: zip -r ../woobert.zip woobert
+
+      # The blueprint installs from `releases/latest/download/woobert.zip`, so
+      # the asset must land on the release release-please just created.
+      - name: Attach zip to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" woobert.zip --clobber
