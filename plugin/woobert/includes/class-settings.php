@@ -23,6 +23,22 @@ class Woobert_Settings {
 	public static function init(): void {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register' ) );
+		add_action( 'admin_init', array( __CLASS__, 'privacy_policy_content' ) );
+	}
+
+	/**
+	 * Offer suggested wording for the site's privacy policy, since the plugin
+	 * sends the merchant's typed request to a third-party inference endpoint.
+	 */
+	public static function privacy_policy_content(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+
+		$content = '<p class="privacy-policy-tutorial">' . esc_html__( 'Suggested text for stores using Woobert.', 'woobert' ) . '</p>'
+			. '<p>' . esc_html__( 'When a store administrator runs a command through Woobert, the text they typed and the id of the order or product on the screen they are viewing are sent to the inference endpoint configured under WooCommerce -> Woobert, so that the request can be matched to a WooCommerce action. No customer records, order contents, or site credentials are sent. Requests are only made when an administrator runs a command. Each command an administrator runs is recorded in a log stored on this site.', 'woobert' ) . '</p>';
+
+		wp_add_privacy_policy_content( 'Woobert', wp_kses_post( $content ) );
 	}
 
 	/**
@@ -117,8 +133,8 @@ class Woobert_Settings {
 				<p>
 					<?php
 					printf(
-						/* translators: %s: link to the Fernfly website. */
 						wp_kses(
+							/* translators: %s: link to the Fernfly website. */
 							__( 'Woobert is powered by <strong>Fern</strong>, a family of tiny function-calling models by %s. The model maps your request to a WooCommerce REST API call; the plugin runs it server-side and shows you the result.', 'woobert' ),
 							array( 'strong' => array() )
 						),
@@ -127,7 +143,41 @@ class Woobert_Settings {
 					?>
 				</p>
 			</div>
-			<p><?php esc_html_e( 'Connect Woobert to your inference endpoint. Press ⌘K / Ctrl-K anywhere in wp-admin and pick "Ask Woobert" to open the command palette.', 'woobert' ); ?></p>
+
+			<h2><?php esc_html_e( 'Connect a model', 'woobert' ); ?></h2>
+			<p><?php esc_html_e( 'Woobert needs a Fernfly project to read your requests. Setting one up takes a few minutes:', 'woobert' ); ?></p>
+			<ol>
+				<li>
+					<?php
+					printf(
+						wp_kses(
+							/* translators: %s: link to the Fernfly sign-up page. */
+							__( 'Create a free account at %s and start a new project.', 'woobert' ),
+							array()
+						),
+						'<a href="' . esc_url( 'https://fernfly.com' ) . '" target="_blank" rel="noreferrer">fernfly.com</a>'
+					);
+					?>
+				</li>
+				<li><?php esc_html_e( 'Import the WooCommerce tool set into the project. It ships with this plugin as tools.json, in the plugin folder.', 'woobert' ); ?></li>
+				<li><?php esc_html_e( 'Train the project, then deploy it. Fernfly generates the training data for you.', 'woobert' ); ?></li>
+				<li><?php esc_html_e( 'Copy the project\'s infer URL and API key into the fields below, and save.', 'woobert' ); ?></li>
+			</ol>
+			<p class="description">
+				<?php
+				printf(
+					wp_kses(
+						/* translators: 1: terms of service link, 2: privacy policy link. */
+						__( 'Using Woobert sends your typed request and the current screen\'s order or product id to Fernfly. Nothing else leaves your store, and requests are only sent when you run a command. See Fernfly\'s %1$s and %2$s.', 'woobert' ),
+						array()
+					),
+					'<a href="' . esc_url( 'https://fernfly.com/terms-of-service' ) . '" target="_blank" rel="noreferrer">' . esc_html__( 'terms of service', 'woobert' ) . '</a>',
+					'<a href="' . esc_url( 'https://fernfly.com/privacy-policy' ) . '" target="_blank" rel="noreferrer">' . esc_html__( 'privacy policy', 'woobert' ) . '</a>'
+				);
+				?>
+			</p>
+
+			<p><?php esc_html_e( 'Once both fields are saved, press ⌘K / Ctrl-K anywhere in wp-admin and pick "Ask Woobert".', 'woobert' ); ?></p>
 			<form method="post" action="options.php">
 				<?php settings_fields( self::OPTION_GROUP ); ?>
 				<table class="form-table" role="presentation">
