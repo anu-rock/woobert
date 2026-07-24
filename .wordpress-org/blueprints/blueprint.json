@@ -1,0 +1,65 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/admin.php?page=woobert",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "latest"
+  },
+  "phpExtensionBundles": [
+    "kitchen-sink"
+  ],
+  "features": {
+    "networking": true
+  },
+  "login": true,
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "woocommerce"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "self"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "Woobert Demo Store",
+        "woocommerce_store_address": "123 Demo Street",
+        "woocommerce_store_city": "Portland",
+        "woocommerce_default_country": "US:OR",
+        "woocommerce_store_postcode": "97201",
+        "woocommerce_currency": "USD",
+        "woocommerce_onboarding_profile": {
+          "skipped": true
+        },
+        "woocommerce_task_list_hidden": "yes",
+        "woocommerce_task_list_welcome_modal_dismissed": "yes",
+        "woocommerce_allow_tracking": "no"
+      }
+    },
+    {
+      "step": "writeFile",
+      "path": "/tmp/woobert-seed.php",
+      "data": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/antelligent-org/woobert/main/scripts/seed-sample-data.php"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/tmp/woobert-seed.php';"
+    }
+  ]
+}
