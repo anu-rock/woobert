@@ -128,6 +128,51 @@ Three things changed during this pass, worth knowing about:
   it is the expected courtesy for a plugin with an external service, and it saves
   a round of reviewer questions.
 
+## Compatibility
+
+Both ends of the declared range are verified, not assumed. Each was run against a
+real install with the plugin active and WooCommerce alongside it.
+
+| | WordPress | WooCommerce | PHP | Result |
+| --- | --- | --- | --- | --- |
+| Floor | 6.6.2 | 9.4.3 | 8.2 | all checks pass |
+| Ceiling | 7.0.2 | 10.9.4 | 8.5 | all checks pass |
+
+Checked at both ends: the plugin activates, `tools.json` parses to 28 tools, core
+registers `react-jsx-runtime` and `wp-commands`, the bundle enqueues *and is
+actually printed*, every declared dependency resolves, all four `hoobert/v1`
+routes register, the settings page renders, and the history table is created.
+
+### Why the floor is 6.6, and how it fails below it
+
+`build/index.asset.php` declares `react-jsx-runtime`, which core registers as a
+script handle from 6.6 onwards. On 6.5 the failure is **silent**, which is why
+this is worth stating plainly. Measured on 6.5.5:
+
+```
+core registers react-jsx-runtime      NO
+core registers wp-commands            yes
+core registers wp-data                yes
+core registers wp-element             yes
+
+enqueued flag        : yes      <- the plugin believes it worked
+actually printed     : NO
+bytes of script tag  : 0
+PHP error raised     : none
+```
+
+`wp_enqueue_script()` succeeds and `wp_script_is( 'hoobert', 'enqueued' )` returns
+true, but `do_items()` emits nothing because one dependency is unregistered. No
+warning, no notice, no console error. The command bar simply never appears.
+
+**Do not lower `Requires at least` below 6.6** without changing the JSX build to
+stop depending on that handle.
+
+Note the practical floor is higher than the declared one: current WooCommerce
+requires WP 6.9, so a store on 6.6 is necessarily on an older WooCommerce. That is
+why the floor was tested against WooCommerce 9.4.3 rather than the current
+release. The `wc/v3` routes the plugin calls are stable across 8.x to 10.x.
+
 ## Submitting
 
 1. Build the zip exactly as the release workflow does: a single top-level folder

@@ -3,7 +3,7 @@
 # Extends the pinned official image (keep this base in sync with the "Tested up
 # to" header and the wpcli image in docker-compose.yml). Xdebug connects out to
 # the IDE on port 9003; see docker/xdebug.ini and .vscode/launch.json.
-FROM wordpress:7.0.0-php8.5-apache
+FROM wordpress:7.0.2-php8.5-apache
 
 # Build Xdebug from PECL, then drop the compile toolchain to keep the image lean.
 # PHP 8.5 needs Xdebug >= 3.5; pecl pulls the latest stable. Pin the exact
