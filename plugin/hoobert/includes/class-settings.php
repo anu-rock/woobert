@@ -159,7 +159,7 @@ class Hoobert_Settings {
 					);
 					?>
 				</li>
-				<li><?php esc_html_e( 'Import the WooCommerce tool set into the project. It ships with this plugin as tools.json, in the plugin folder.', 'hoobert' ); ?></li>
+				<li><?php esc_html_e( 'Choose the WooCommerce template in the new project wizard for a zero-configuration flow.', 'hoobert' ); ?></li>
 				<li><?php esc_html_e( 'Train the project, then deploy it. Fernfly generates the training data for you.', 'hoobert' ); ?></li>
 				<li><?php esc_html_e( 'Copy the project\'s infer URL and API key into the fields below, and save.', 'hoobert' ); ?></li>
 			</ol>
