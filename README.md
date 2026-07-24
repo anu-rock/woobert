@@ -14,6 +14,7 @@ The browser never holds the inference key or WooCommerce credentials. A PHP prox
 - [Adding new tools](#adding-new-tools)
 - [Layout](#layout)
 - [The tool set](#the-tool-set)
+- [Publishing](#publishing)
 - [About](#about)
 
 ## Architecture
@@ -175,6 +176,9 @@ Keep the set focused. It is deliberately capped at ~28 tools covering core journ
 | `scripts/setup.sh`             | Runs in the wpcli container: installs WP + WooCommerce, seeds sample data, mints REST API keys. Idempotent. |
 | `scripts/seed-sample-data.php` | Products, a variable product, orders across 90 days and every status, refunds, customers, reviews, coupons, plus a refund-capable sample gateway. Idempotent. Shared by local dev and the blueprint demo. |
 | `scripts/generate-api-key.php` | Mints a WooCommerce REST consumer key/secret for external testing.                                   |
+| `assets-src/`                  | Sources for the plugin-directory artwork: the owl (`woobert-owl.svg`) and the banner layout (`banner.html`). |
+| `.wordpress-org/`              | Generated directory assets (icons, banners, preview blueprint) plus hand-added screenshots. Copied to SVN `assets/` on release. |
+| `docs/wordpress-org-submission.md` | Everything needed to publish to the WordPress.org plugin directory.                              |
 
 ## The tool set
 
@@ -189,6 +193,23 @@ Keep the set focused. It is deliberately capped at ~28 tools covering core journ
 - **Taxonomy** - product categories & tags (list/create).
 - **Reports** - sales, top sellers (legacy `wc/v3/reports/*`); top customers uses the `wc-analytics` namespace, which requires WooCommerce Analytics enabled (setup does this).
 
+## Publishing
+
+Woobert is built to ship through the WordPress.org plugin directory.
+[`docs/wordpress-org-submission.md`](docs/wordpress-org-submission.md) covers the
+guidelines, the compliance checklist, and the submission steps.
+
+Directory artwork is generated from `assets-src/`:
+
+```bash
+node scripts/build-wporg-assets.mjs   # icons + banners -> .wordpress-org/
+```
+
+Screenshots are added by hand as `.wordpress-org/screenshot-N.png`, matching the
+captions in [`readme.txt`](plugin/woobert/readme.txt). Once the plugin is approved
+and `SVN_USERNAME` / `SVN_PASSWORD` are set as repository secrets, the release
+workflow publishes each release to wp.org automatically.
+
 ## About
 
 Woobert is a merchant-facing command bar for WooCommerce, packaged as a production WordPress plugin. It is a satellite of the [Fernfly](https://fernfly.com) platform, which fine-tunes and deploys **Fern**, the small function-calling model that maps each merchant utterance to a tool call.
@@ -196,3 +217,5 @@ Woobert is a merchant-facing command bar for WooCommerce, packaged as a producti
 Woobert is a proof that a tiny, specialized model driving a real, complex admin surface: the plugin ships a fixed tool set, executes REST calls under the admin's own capabilities, confirms anything destructive, and logs every command. No keys in the browser, no SPA, no general-purpose LLM in the loop.
 
 License: GPL-2.0-or-later.
+
+Owl artwork: <a href="https://www.flaticon.com/free-icons/funny-owl" title="funny owl icons">Funny owl icons created by agustrisana - Flaticon</a>.

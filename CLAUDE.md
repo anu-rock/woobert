@@ -62,6 +62,21 @@ shippable product: no "demo" framing in code, UI, or docs.
   project; keep the two in sync when tools change.
 - `docker-compose.yml`, `scripts/setup.sh`, `scripts/seed-sample-data.php`,
   `scripts/generate-api-key.php`.
+- `assets-src/` — sources for the plugin-directory artwork (owl SVG, banner HTML);
+  `.wordpress-org/` — the generated icons/banners plus hand-added screenshots, copied
+  to SVN `assets/` on release. Regenerate with `node scripts/build-wporg-assets.mjs`;
+  never hand-edit the PNGs. The owl also ships inside the plugin at
+  `plugin/woobert/assets/woobert-owl.svg` for the settings screen, and its Flaticon
+  attribution must stay on that screen, in `readme.txt`, and in `README.md`.
+
+## Shipping to WordPress.org
+
+[`docs/wordpress-org-submission.md`](docs/wordpress-org-submission.md) is the playbook.
+Things to keep in mind when changing anything user-facing:
+
+- **Verify with the real tool, not by eye.** `docker compose run --rm --entrypoint wp
+  wpcli plugin check woobert --exclude-directories=node_modules,src,scripts,build`.
+  It should report zero errors; the only expected warnings are the naming ones.
 
 ## Commands
 
