@@ -22,10 +22,18 @@ in your plugin slug.
 ```
 
 The rule is [guideline 17](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names):
-trademarked terms may not be the sole or initial term of a slug. "woo" is on the
-restricted list on behalf of Automattic, and the check is a substring match, so the
-portmanteau does not get a pass. The slug is also **permanent once approved**, so
+trademarked terms may not be the sole or initial term of a slug. "woo" is handled
+by a rule of its own: it is the only entry in the checker's `PORTMANTEAUS` list
+(`Trademarks_Check.php`), matched with `stripos( $slug, 'woo' ) === 0`. So the bar
+is that a slug may not *begin* with "woo", which "woobert" does. The wording the
+tool prints ("cannot be used at all") overstates its own rule, but the outcome for
+this name is the same either way. The slug is also **permanent once approved**, so
 there is no fixing it later.
+
+Candidate names can be checked against the real list without renaming anything:
+extract `TRADEMARK_SLUGS` and `PORTMANTEAUS` from that file and run a slug through
+the same two loops. Terms ending in `-` are prefix-only; the rest match anywhere,
+minus the `for-TRADEMARK` / `with-TRADEMARK` exceptions.
 
 Two things follow:
 
