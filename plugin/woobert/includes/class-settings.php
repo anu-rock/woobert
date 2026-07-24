@@ -75,11 +75,22 @@ class Woobert_Settings {
 
 	/**
 	 * Sanitize saved settings.
+	 *
+	 * The key field renders empty rather than echoing the stored secret, so an
+	 * empty submission means "leave it alone", not "clear it". Clearing is done
+	 * with the explicit checkbox.
 	 */
 	public static function sanitize( $input ): array {
+		$submitted = sanitize_text_field( (string) ( $input['api_key'] ?? '' ) );
+		$clearing  = ! empty( $input['api_key_clear'] );
+
+		if ( '' === $submitted && ! $clearing ) {
+			$submitted = self::api_key();
+		}
+
 		return array(
 			'endpoint' => esc_url_raw( (string) ( $input['endpoint'] ?? '' ) ),
-			'api_key'  => sanitize_text_field( (string) ( $input['api_key'] ?? '' ) ),
+			'api_key'  => $clearing ? '' : $submitted,
 		);
 	}
 
@@ -124,9 +135,21 @@ class Woobert_Settings {
 						<th scope="row"><label for="woobert-endpoint"><?php esc_html_e( 'Inference endpoint URL', 'woobert' ); ?></label></th>
 						<td><input name="<?php echo esc_attr( self::OPTION_NAME ); ?>[endpoint]" id="woobert-endpoint" type="url" class="regular-text" placeholder="https://fernfly.com/api/p/27/infer" value="<?php echo esc_attr( $opts['endpoint'] ?? '' ); ?>" /></td>
 					</tr>
+					<?php $has_key = '' !== self::api_key(); ?>
 					<tr>
 						<th scope="row"><label for="woobert-key"><?php esc_html_e( 'API key', 'woobert' ); ?></label></th>
-						<td><input name="<?php echo esc_attr( self::OPTION_NAME ); ?>[api_key]" id="woobert-key" type="password" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $opts['api_key'] ?? '' ); ?>" /></td>
+						<td>
+							<input name="<?php echo esc_attr( self::OPTION_NAME ); ?>[api_key]" id="woobert-key" type="password" class="regular-text" autocomplete="off" value=""
+								placeholder="<?php echo esc_attr( $has_key ? __( 'Saved. Enter a new key to replace it.', 'woobert' ) : __( 'Paste your project API key', 'woobert' ) ); ?>" />
+							<?php if ( $has_key ) : ?>
+								<p class="description">
+									<label>
+										<input type="checkbox" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[api_key_clear]" value="1" />
+										<?php esc_html_e( 'Remove the saved key', 'woobert' ); ?>
+									</label>
+								</p>
+							<?php endif; ?>
+						</td>
 					</tr>
 				</table>
 				<?php submit_button(); ?>
