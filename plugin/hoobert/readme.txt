@@ -5,7 +5,7 @@ Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.0
 Requires Plugins: woocommerce
-Stable tag: 0.1.2
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,39 @@ Yes. The repository has a [WordPress Playground](https://github.com/antelligent-
 7. The store-wide audit log records every command, who ran it, and what it did.
 
 == Changelog ==
+
+= 0.2.0 =
+
+**⚠ BREAKING CHANGES**
+
+* the plugin folder and slug are now "hoobert". Existing installs from a GitHub release will see a separate plugin rather than an upgrade; activating it carries the old settings and history across.
+
+**Features**
+
+* add wordpress.org directory assets and their build script
+* document the inference service on the settings page
+* rename the plugin from woobert to hoobert
+
+**Bug Fixes**
+
+* build every directory asset from the original owl artwork
+* lower the minimum wordpress version to 6.6
+* only load the command bar for users who can use it
+* stop rendering the saved api key into the settings page
+
+**Refactors**
+
+* clear the remaining plugin check findings
+
+**Documentation**
+
+* add the plugin directory screenshots
+* add the wordpress.org submission playbook
+* clean up wporg guide
+* correct how wp.org matches the restricted term "woo"
+* fix fernfly create project instruction
+* record compatibility verified across the declared range
+* rewrite readme.txt as the plugin directory listing
 
 = 0.1.2 =
 
