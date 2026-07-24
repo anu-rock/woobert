@@ -67,6 +67,7 @@ class Woobert_Fern_Client {
 		if ( $code < 200 || $code >= 300 || ! is_array( $decoded ) ) {
 			$message = is_array( $decoded ) && isset( $decoded['error'] )
 				? (string) $decoded['error']
+				/* translators: %d: HTTP status code returned by the inference endpoint. */
 				: sprintf( __( 'Inference endpoint returned HTTP %d.', 'woobert' ), (int) $code );
 			return array(
 				'ok'    => false,

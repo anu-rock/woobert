@@ -85,6 +85,7 @@ class Woobert_History {
 	public static function record( array $entry ): void {
 		global $wpdb;
 		self::maybe_install();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- writing to the plugin's own audit table.
 		$wpdb->insert(
 			self::table(),
 			array(
@@ -114,9 +115,12 @@ class Woobert_History {
 		if ( ! $user_id ) {
 			return array();
 		}
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- plugin-owned audit table with no core API; the only interpolation is the table name, which is the site prefix plus a class constant.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT * FROM ' . self::table() . ' WHERE user_id = %d ORDER BY id DESC LIMIT %d',
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+				"SELECT * FROM `{$table}` WHERE user_id = %d ORDER BY id DESC LIMIT %d",
 				$user_id,
 				$limit
 			),
@@ -133,11 +137,19 @@ class Woobert_History {
 	 */
 	public static function all( int $limit = 0 ): array {
 		global $wpdb;
-		$sql = 'SELECT * FROM ' . self::table() . ' ORDER BY id DESC';
-		if ( $limit > 0 ) {
-			$sql = $wpdb->prepare( $sql . ' LIMIT %d', $limit );
-		}
-		$rows = $wpdb->get_results( $sql, ARRAY_A );
+		$table = self::table();
+		// A 0 limit means "everything"; MySQL has no unbounded LIMIT, so use the
+		// max row count instead of branching into a second, unprepared query.
+		$limit = $limit > 0 ? $limit : PHP_INT_MAX;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- plugin-owned audit table with no core API; the only interpolation is the table name, which is the site prefix plus a class constant.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+				"SELECT * FROM `{$table}` ORDER BY id DESC LIMIT %d",
+				$limit
+			),
+			ARRAY_A
+		);
 		return array_map( array( __CLASS__, 'format_row' ), $rows ?: array() );
 	}
 
