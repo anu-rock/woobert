@@ -1,23 +1,23 @@
 /**
- * Woobert entry point.
+ * Hoobert entry point.
  *
- * Registers an "Ask Woobert" command on WordPress core's command palette
+ * Registers an "Ask Hoobert" command on WordPress core's command palette
  * (`core/commands`, the ⌘K / Ctrl-K bar WP mounts across wp-admin) and mounts the
  * flow modal. The palette's command loader mirrors the typed text into a single
- * command; selecting it hands the utterance to the standalone Woobert flow modal
+ * command; selecting it hands the utterance to the standalone Hoobert flow modal
  * (flow.js), which runs the resolve/confirm/execute cycle the palette can't host.
  */
 
 import { store as commandsStore } from '@wordpress/commands';
 import { dispatch } from '@wordpress/data';
 import { createRoot, useState, useEffect, useMemo } from '@wordpress/element';
-import { WoobertFlowModal } from './flow';
-import { WoobertHistoryModal } from './history';
+import { HoobertFlowModal } from './flow';
+import { HoobertHistoryModal } from './history';
 import './style.css';
 
 // Inline icon (avoids pulling in the bundled @wordpress/icons package).
 // A friendly owl helper: ear tufts, wide bespectacled eyes, small beak, feet.
-const woobertIcon = (
+const hoobertIcon = (
 	<svg
 		viewBox="0 0 24 24"
 		width="24"
@@ -56,10 +56,10 @@ let openHistory = null;
 let flowSeq = 0;
 
 /**
- * Command loader: reflects the current palette search into an "Ask Woobert"
+ * Command loader: reflects the current palette search into an "Ask Hoobert"
  * command. The palette calls this hook with the live `search` text.
  */
-function useAskWoobertCommands( { search } ) {
+function useAskHoobertCommands( { search } ) {
 	const trimmed = ( search || '' ).trim();
 
 	return useMemo(
@@ -69,9 +69,9 @@ function useAskWoobertCommands( { search } ) {
 				trimmed.length > 1
 					? [
 							{
-								name: 'woobert/ask',
-								label: `Ask Woobert: “${ trimmed }”`,
-								icon: woobertIcon,
+								name: 'hoobert/ask',
+								label: `Ask Hoobert: “${ trimmed }”`,
+								icon: hoobertIcon,
 								callback: ( { close } ) => {
 									// Palette can't host the flow; close it and open our modal.
 									close();
@@ -88,7 +88,7 @@ function useAskWoobertCommands( { search } ) {
 }
 
 /**
- * Invisible root that owns Woobert's modals and exposes openers to palette
+ * Invisible root that owns Hoobert's modals and exposes openers to palette
  * commands. Only one modal is shown at a time (`view` holds which, plus its data).
  */
 function PaletteController() {
@@ -110,7 +110,7 @@ function PaletteController() {
 		// key on seq: a fresh mount per open, so a new query never briefly shows
 		// the previous query's result while the next one resolves.
 		return (
-			<WoobertFlowModal
+			<HoobertFlowModal
 				key={ view.seq }
 				query={ view.query }
 				onClose={ close }
@@ -118,7 +118,7 @@ function PaletteController() {
 		);
 	}
 	if ( view?.type === 'history' ) {
-		return <WoobertHistoryModal onClose={ close } />;
+		return <HoobertHistoryModal onClose={ close } />;
 	}
 	return null;
 }
@@ -133,16 +133,16 @@ export function init() {
 		return;
 	}
 	commands.registerCommandLoader( {
-		name: 'woobert/ask',
-		hook: useAskWoobertCommands,
+		name: 'hoobert/ask',
+		hook: useAskHoobertCommands,
 	} );
 
 	// A static command, always listed in the palette, that opens the history modal.
 	if ( commands.registerCommand ) {
 		commands.registerCommand( {
-			name: 'woobert/history',
-			label: 'Woobert: Query history',
-			icon: woobertIcon,
+			name: 'hoobert/history',
+			label: 'Hoobert: Query history',
+			icon: hoobertIcon,
 			callback: ( { close } ) => {
 				close();
 				if ( openHistory ) {
@@ -153,7 +153,7 @@ export function init() {
 	}
 
 	const container = document.createElement( 'div' );
-	container.id = 'woobert-palette-root';
+	container.id = 'hoobert-palette-root';
 	document.body.appendChild( container );
 	createRoot( container ).render( <PaletteController /> );
 }

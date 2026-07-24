@@ -1,6 +1,6 @@
 <?php
 /**
- * Thin client for the Woobert inference endpoint (a Fernfly project infer route).
+ * Thin client for the Hoobert inference endpoint (a Fernfly project infer route).
  *
  * Given a natural-language merchant utterance, the endpoint returns the tool
  * call(s) its fine-tuned model chose. The project owns the registered tool set,
@@ -8,16 +8,16 @@
  * back Fernfly's `{ calls: [{name, arguments}] }` response shape directly.
  *
  * Endpoint URL and API key are configured on the settings page
- * (WooCommerce -> Woobert).
+ * (WooCommerce -> Hoobert).
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Woobert_Fern_Client {
+class Hoobert_Fern_Client {
 
 	/**
 	 * Ask the model to translate a natural-language query into tool calls.
@@ -27,14 +27,14 @@ class Woobert_Fern_Client {
 	 * @return array{ok:bool, calls:array<int,array{name:string,arguments:array}>, out_of_scope?:bool, reply?:string, error?:string, raw?:mixed}
 	 */
 	public function infer( string $query, array $context = array() ): array {
-		$endpoint = Woobert_Settings::endpoint();
-		$api_key  = Woobert_Settings::api_key();
+		$endpoint = Hoobert_Settings::endpoint();
+		$api_key  = Hoobert_Settings::api_key();
 
 		if ( ! $endpoint || ! $api_key ) {
 			return array(
 				'ok'    => false,
 				'calls' => array(),
-				'error' => __( 'Inference endpoint or API key is not configured. Set it under WooCommerce → Woobert.', 'woobert' ),
+				'error' => __( 'Inference endpoint or API key is not configured. Set it under WooCommerce → Hoobert.', 'hoobert' ),
 			);
 		}
 
@@ -67,7 +67,8 @@ class Woobert_Fern_Client {
 		if ( $code < 200 || $code >= 300 || ! is_array( $decoded ) ) {
 			$message = is_array( $decoded ) && isset( $decoded['error'] )
 				? (string) $decoded['error']
-				: sprintf( __( 'Inference endpoint returned HTTP %d.', 'woobert' ), (int) $code );
+				/* translators: %d: HTTP status code returned by the inference endpoint. */
+				: sprintf( __( 'Inference endpoint returned HTTP %d.', 'hoobert' ), (int) $code );
 			return array(
 				'ok'    => false,
 				'calls' => array(),

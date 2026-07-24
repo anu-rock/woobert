@@ -1,11 +1,11 @@
-# Local WooCommerce stack for Woobert development.
+# Local WooCommerce stack for Hoobert development.
 #
 #   docker compose up -d          # bring up db + wordpress
 #   ./scripts/setup.sh            # install WP + WooCommerce, sample data, API keys
 #   open http://localhost:8080/wp-admin
 #
 # The plugin source is bind-mounted into wp-content/plugins, so edits are live
-# (rebuild the JS bundle with `npm run build` inside plugin/woobert).
+# (rebuild the JS bundle with `npm run build` inside plugin/hoobert).
 
 services:
   db:
@@ -46,7 +46,7 @@ services:
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:-wordpress}
     volumes:
       - wp_data:/var/www/html
-      - ./plugin/woobert:/var/www/html/wp-content/plugins/woobert
+      - ./plugin/hoobert:/var/www/html/wp-content/plugins/hoobert
       - ./scripts:/scripts
 
   # WP-CLI runner that provisions the stack on `docker compose up`: it waits for
@@ -77,10 +77,10 @@ services:
       WP_ADMIN_USER: ${WP_ADMIN_USER:-admin}
       WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-admin_password}
       WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.com}
-      WP_SITE_TITLE: ${WP_SITE_TITLE:-Woobert Dev Store}
+      WP_SITE_TITLE: ${WP_SITE_TITLE:-Hoobert Dev Store}
     volumes:
       - wp_data:/var/www/html
-      - ./plugin/woobert:/var/www/html/wp-content/plugins/woobert
+      - ./plugin/hoobert:/var/www/html/wp-content/plugins/hoobert
       - ./scripts:/scripts
     entrypoint: ["/bin/sh", "/scripts/setup.sh"]
 

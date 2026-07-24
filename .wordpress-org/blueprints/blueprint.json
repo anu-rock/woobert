@@ -26,8 +26,7 @@
     {
       "step": "installPlugin",
       "pluginData": {
-        "resource": "url",
-        "url": "https://github.com/antelligent-org/hoobert/releases/latest/download/hoobert.zip"
+        "resource": "self"
       },
       "options": {
         "activate": true
@@ -47,11 +46,7 @@
         },
         "woocommerce_task_list_hidden": "yes",
         "woocommerce_task_list_welcome_modal_dismissed": "yes",
-        "woocommerce_allow_tracking": "no",
-        "hoobert_options": {
-          "endpoint": "https://fernfly.com/api/p/27/infer",
-          "api_key": ""
-        }
+        "woocommerce_allow_tracking": "no"
       }
     },
     {

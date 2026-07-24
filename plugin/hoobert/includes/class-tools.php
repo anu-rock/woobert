@@ -7,14 +7,14 @@
  * mapping. The same tool set is registered with the Fern inference project so the
  * model and the executor stay in sync.
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Woobert_Tools {
+class Hoobert_Tools {
 
 	/**
 	 * Cached decoded tool set.
@@ -59,7 +59,7 @@ class Woobert_Tools {
 	 * Locate the tools.json shipped in the plugin root.
 	 */
 	private static function tools_path(): ?string {
-		$path = WOOBERT_PATH . 'tools.json';
+		$path = HOOBERT_PATH . 'tools.json';
 		return file_exists( $path ) ? $path : null;
 	}
 }

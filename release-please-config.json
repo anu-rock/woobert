@@ -5,7 +5,7 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "package-name": "woobert",
+      "package-name": "hoobert",
       "include-component-in-tag": false,
       "changelog-path": "CHANGELOG.md",
       "changelog-sections": [

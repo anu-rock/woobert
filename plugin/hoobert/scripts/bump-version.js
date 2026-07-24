@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Bump the Woobert release version across every file that carries it.
+ * Bump the Hoobert release version across every file that carries it.
  *
- * Usage (run from plugin/woobert):
+ * Usage (run from plugin/hoobert):
  *   npm run bump -- <version>     e.g. npm run bump -- 0.2.0
  *   npm run bump -- patch|minor|major
  *
- * Touches: woobert.php (header + WOOBERT_VERSION), package.json, readme.txt
+ * Touches: hoobert.php (header + HOOBERT_VERSION), package.json, readme.txt
  * (Stable tag), and ../../version.txt. Each edit is a targeted regex so
  * surrounding formatting is preserved; the run aborts if any expected version
  * marker is missing, so partial bumps can't ship.
@@ -62,15 +62,15 @@ function resolveVersion(arg, from) {
 function edits(version) {
 	return [
 		{
-			label: 'woobert.php (plugin header)',
-			file: path.join(pluginDir, 'woobert.php'),
+			label: 'hoobert.php (plugin header)',
+			file: path.join(pluginDir, 'hoobert.php'),
 			re: /^(\s*\*\s*Version:\s*)(\d+\.\d+\.\d+)(\s*)$/m,
 			next: version,
 		},
 		{
-			label: 'woobert.php (WOOBERT_VERSION)',
-			file: path.join(pluginDir, 'woobert.php'),
-			re: /(define\(\s*'WOOBERT_VERSION',\s*')(\d+\.\d+\.\d+)(' \);)/,
+			label: 'hoobert.php (HOOBERT_VERSION)',
+			file: path.join(pluginDir, 'hoobert.php'),
+			re: /(define\(\s*'HOOBERT_VERSION',\s*')(\d+\.\d+\.\d+)(' \);)/,
 			next: version,
 		},
 		{

@@ -1,16 +1,16 @@
 /**
- * Fetch wrappers around the plugin's own admin REST routes (woobert/v1).
+ * Fetch wrappers around the plugin's own admin REST routes (hoobert/v1).
  * The browser never sees the inference API key. The PHP proxy holds it.
  */
 
-/* global woobert */
+/* global hoobert */
 
 /**
  * Read the runtime config injected by wp_localize_script.
  */
 export function config() {
-	return typeof woobert !== 'undefined'
-		? woobert
+	return typeof hoobert !== 'undefined'
+		? hoobert
 		: { root: '', nonce: '', context: {} };
 }
 
@@ -58,7 +58,7 @@ function post( path, payload ) {
 }
 
 /**
- * Ask Woobert to translate a natural-language query into tool call(s). No execution.
+ * Ask Hoobert to translate a natural-language query into tool call(s). No execution.
  *
  * @param {string} query Merchant's request.
  * @return {Promise<{ok:boolean, calls:Array}>} Resolved tool calls with confirm flags.

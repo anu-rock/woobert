@@ -9,14 +9,14 @@
  * rest_do_request, so it inherits the current admin user's capabilities and
  * needs no consumer key/secret round-trip.
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Woobert_Executor {
+class Hoobert_Executor {
 
 	/**
 	 * Execute a tool call.
@@ -26,7 +26,7 @@ class Woobert_Executor {
 	 * @return array{ok:bool, status:int, data:mixed, request:array, error?:string}
 	 */
 	public function run( string $tool_name, array $arguments ): array {
-		$tool = Woobert_Tools::find( $tool_name );
+		$tool = Hoobert_Tools::find( $tool_name );
 		if ( ! $tool ) {
 			return array(
 				'ok'     => false,
@@ -117,7 +117,7 @@ class Woobert_Executor {
 			return array(
 				'type'    => 'list',
 				'count'   => count( $rows ),
-				'empty'   => $spec['empty'] ?? __( 'No results.', 'woobert' ),
+				'empty'   => $spec['empty'] ?? __( 'No results.', 'hoobert' ),
 				'columns' => array_map( static fn( $f ) => $f['label'], $fields ),
 				'rows'    => $rows,
 			);
@@ -196,13 +196,13 @@ class Woobert_Executor {
 				return self::humanize( (string) $value );
 			case 'stock':
 				$map = array(
-					'instock'     => __( 'In stock', 'woobert' ),
-					'outofstock'  => __( 'Out of stock', 'woobert' ),
-					'onbackorder' => __( 'On backorder', 'woobert' ),
+					'instock'     => __( 'In stock', 'hoobert' ),
+					'outofstock'  => __( 'Out of stock', 'hoobert' ),
+					'onbackorder' => __( 'On backorder', 'hoobert' ),
 				);
 				return $map[ $value ] ?? self::humanize( (string) $value );
 			case 'bool':
-				return $value ? __( 'Yes', 'woobert' ) : __( 'No', 'woobert' );
+				return $value ? __( 'Yes', 'hoobert' ) : __( 'No', 'hoobert' );
 			default:
 				return (string) $value;
 		}

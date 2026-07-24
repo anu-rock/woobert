@@ -45,7 +45,7 @@ jobs:
       - name: Sync version markers and readme changelog
         run: |
           version="$(jq -r '.["."]' .release-please-manifest.json)"
-          node plugin/woobert/scripts/bump-version.js "$version"
+          node plugin/hoobert/scripts/bump-version.js "$version"
           node scripts/sync-readme-changelog.js "$version"
 
       - name: Commit to the release PR
@@ -64,6 +64,10 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
+    # Step-level `if` can't read `secrets`, so decide here whether the
+    # WordPress.org leg of the release is wired up yet.
+    env:
+      HAS_WPORG_CREDENTIALS: ${{ secrets.SVN_USERNAME != '' && secrets.SVN_PASSWORD != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -71,36 +75,54 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: plugin/woobert/package-lock.json
+          cache-dependency-path: plugin/hoobert/package-lock.json
 
       - name: Install dependencies
-        working-directory: plugin/woobert
+        working-directory: plugin/hoobert
         run: npm ci
 
       - name: Build front-end bundle
-        working-directory: plugin/woobert
+        working-directory: plugin/hoobert
         run: npm run build
 
       # Stage only the files that ship in the plugin. The zip has a single
-      # top-level `woobert/` folder so it installs under that slug.
+      # top-level `hoobert/` folder so it installs under that slug.
       - name: Assemble plugin directory
         run: |
-          mkdir -p dist/woobert
+          mkdir -p dist/hoobert
           cp -R \
-            plugin/woobert/woobert.php \
-            plugin/woobert/tools.json \
-            plugin/woobert/readme.txt \
-            plugin/woobert/includes \
-            plugin/woobert/build \
-            dist/woobert/
+            plugin/hoobert/hoobert.php \
+            plugin/hoobert/tools.json \
+            plugin/hoobert/readme.txt \
+            plugin/hoobert/includes \
+            plugin/hoobert/assets \
+            plugin/hoobert/build \
+            LICENSE \
+            dist/hoobert/
+          # wp.org rejects hidden files outright; strip any that rode along.
+          find dist -name '.DS_Store' -o -name '._*' -delete
 
       - name: Create zip
         working-directory: dist
-        run: zip -r ../woobert.zip woobert
+        run: zip -r ../hoobert.zip hoobert
 
-      # The blueprint installs from `releases/latest/download/woobert.zip`, so
+      # The blueprint installs from `releases/latest/download/hoobert.zip`, so
       # the asset must land on the release release-please just created.
       - name: Attach zip to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" woobert.zip --clobber
+        run: gh release upload "${{ needs.release-please.outputs.tag_name }}" hoobert.zip --clobber
+
+      # Publish to the WordPress.org directory. Inert until the plugin has been
+      # approved and the SVN credentials are added as repository secrets, so it
+      # is safe to keep enabled from the first release onwards. Directory assets
+      # (icons, banner, screenshots, preview blueprint) come from .wordpress-org.
+      - name: Deploy to WordPress.org
+        if: env.HAS_WPORG_CREDENTIALS == 'true'
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: hoobert
+          BUILD_DIR: dist/hoobert
+          ASSETS_DIR: .wordpress-org

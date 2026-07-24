@@ -11,7 +11,7 @@
  * Invoked by scripts/setup.sh, or directly via:
  *   docker compose run --rm --entrypoint wp wpcli eval-file /scripts/generate-api-key.php
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 if ( ! defined( 'ABSPATH' ) || ! class_exists( 'WooCommerce' ) ) {
@@ -28,7 +28,7 @@ $user_id = (int) $user[0]->ID;
 
 // Idempotent: keep the existing key. Its secret is unrecoverable (stored hashed),
 // so it can only be shown at creation; delete the row to mint a fresh pair.
-$description = 'Woobert';
+$description = 'Hoobert';
 $existing    = $wpdb->get_var(
 	$wpdb->prepare(
 		"SELECT truncated_key FROM {$wpdb->prefix}woocommerce_api_keys WHERE description = %s LIMIT 1",
