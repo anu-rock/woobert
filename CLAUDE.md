@@ -65,8 +65,11 @@ shippable product: no "demo" framing in code, UI, or docs.
 - `assets-src/` — sources for the plugin-directory artwork (owl SVG, banner HTML);
   `.wordpress-org/` — the generated icons/banners plus hand-added screenshots, copied
   to SVN `assets/` on release. Regenerate with `node scripts/build-wporg-assets.mjs`;
-  never hand-edit the PNGs. The owl also ships inside the plugin at
-  `plugin/hoobert/assets/hoobert-owl.svg` for the settings screen, and its Flaticon
+  never hand-edit the PNGs. One mark drives every output: `hoobert-owl.png` (the
+  original artwork) when present, else `hoobert-owl.svg` (a redraw). Never let both
+  reach one build; that is also why `icon.svg` is only emitted when the redraw is
+  the mark. The owl also ships inside the plugin at
+  `plugin/hoobert/assets/hoobert-owl.png` for the settings screen, and its Flaticon
   attribution must stay on that screen, in `readme.txt`, and in `README.md`.
 
 ## Shipping to WordPress.org

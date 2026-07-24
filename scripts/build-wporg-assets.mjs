@@ -9,12 +9,14 @@
  *   banner-772x250.png  banner-1544x500.png
  *
  * Sources:
- *   assets-src/hoobert-owl.svg  - the owl mark (vector)
- *   assets-src/hoobert-owl.png  - optional; the original raster art. When
- *                                 present it is used for the icons instead of
- *                                 the SVG, so the shipped icon is the artist's
- *                                 file rather than our vector redraw.
- *   assets-src/banner.html      - the banner layout, rendered at 1544x500
+ *   assets-src/hoobert-owl.png  - the original raster art. When present it is
+ *                                 the mark for every output: icons, banner, and
+ *                                 the copy shipped inside the plugin.
+ *   assets-src/hoobert-owl.svg  - a vector redraw, used only as a stand-in when
+ *                                 the original above is absent.
+ *   assets-src/banner.html      - the banner layout, rendered at 1544x500. It
+ *                                 references the .svg so it previews standalone;
+ *                                 the render swaps in whichever mark applies.
  *
  * Rasterising uses headless Chrome (no npm dependencies): each source is loaded
  * in a page sized to the target and screenshotted with a transparent backdrop.
@@ -25,7 +27,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, copyFileSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -104,9 +106,13 @@ function main() {
 		throw new Error( `Missing ${ owlSvg }` );
 	}
 
-	// Prefer the original raster art for the icons when it has been dropped in.
-	const iconSource = existsSync( owlPng ) ? 'hoobert-owl.png' : 'hoobert-owl.svg';
-	console.log( `Icon source: assets-src/${ iconSource }` );
+	// One mark drives every output. The original raster art wins when it is
+	// present; the vector redraw is only a stand-in for when it is not.
+	const usingOriginal = existsSync( owlPng );
+	const mark = usingOriginal ? 'hoobert-owl.png' : 'hoobert-owl.svg';
+	console.log(
+		`Mark: assets-src/${ mark }${ usingOriginal ? '' : '  (vector redraw, no original present)' }`
+	);
 
 	const scratch = join( tmpdir(), `hoobert-assets-${ process.pid }` );
 	mkdirSync( scratch, { recursive: true } );
@@ -114,7 +120,7 @@ function main() {
 	try {
 		// Icons. Render at 256 and downscale, so both share exact pixel geometry.
 		const iconPage = join( src, '.icon.html' );
-		writeFileSync( iconPage, imagePage( iconSource, 256 ) );
+		writeFileSync( iconPage, imagePage( mark, 256 ) );
 		shoot( `file://${ iconPage }`, 256, 256, join( out, 'icon-256x256.png' ) );
 		resize(
 			join( out, 'icon-256x256.png' ),
@@ -122,23 +128,35 @@ function main() {
 			128,
 			128
 		);
+
+		// icon.svg is served to modern browsers with the PNGs as its fallback, so
+		// it may only exist when it is the same artwork. Shipping the redraw
+		// alongside PNGs of the original would give the listing two icons.
+		const iconSvg = join( out, 'icon.svg' );
+		if ( usingOriginal ) {
+			rmSync( iconSvg, { force: true } );
+			console.log( '  .wordpress-org/icon.svg  (omitted: original is raster)' );
+		} else {
+			copyFileSync( owlSvg, iconSvg );
+			console.log( '  .wordpress-org/icon.svg' );
+		}
+
+		// The settings screen gets the same mark, always as a PNG so the plugin
+		// ships one predictable filename whichever source was used.
+		writeFileSync( iconPage, imagePage( mark, 256 ) );
+		shoot( `file://${ iconPage }`, 256, 256, join( shipped, 'hoobert-owl.png' ) );
+		rmSync( join( shipped, 'hoobert-owl.svg' ), { force: true } );
 		rmSync( iconPage, { force: true } );
 
-		// icon.svg is served to modern browsers; the PNGs above are its fallback.
-		copyFileSync( owlSvg, join( out, 'icon.svg' ) );
-		console.log( '  .wordpress-org/icon.svg' );
-
-		// The same mark ships inside the plugin, for the settings screen.
-		copyFileSync( owlSvg, join( shipped, 'hoobert-owl.svg' ) );
-		console.log( '  plugin/hoobert/assets/hoobert-owl.svg' );
-
-		// Banner: render retina, halve for the standard size.
-		shoot(
-			`file://${ join( src, 'banner.html' ) }`,
-			1544,
-			500,
-			join( out, 'banner-1544x500.png' )
+		// Banner. Its source keeps a real filename so it still previews on its
+		// own in a browser; swap in the chosen mark for the render.
+		const bannerPage = join( src, '.banner.html' );
+		writeFileSync(
+			bannerPage,
+			readFileSync( join( src, 'banner.html' ), 'utf8' ).replaceAll( 'hoobert-owl.svg', mark )
 		);
+		shoot( `file://${ bannerPage }`, 1544, 500, join( out, 'banner-1544x500.png' ) );
+		rmSync( bannerPage, { force: true } );
 		resize(
 			join( out, 'banner-1544x500.png' ),
 			join( out, 'banner-772x250.png' ),

@@ -176,7 +176,7 @@ Keep the set focused. It is deliberately capped at ~28 tools covering core journ
 | `scripts/setup.sh`             | Runs in the wpcli container: installs WP + WooCommerce, seeds sample data, mints REST API keys. Idempotent. |
 | `scripts/seed-sample-data.php` | Products, a variable product, orders across 90 days and every status, refunds, customers, reviews, coupons, plus a refund-capable sample gateway. Idempotent. Shared by local dev and the blueprint demo. |
 | `scripts/generate-api-key.php` | Mints a WooCommerce REST consumer key/secret for external testing.                                   |
-| `assets-src/`                  | Sources for the plugin-directory artwork: the owl (`hoobert-owl.svg`) and the banner layout (`banner.html`). |
+| `assets-src/`                  | Sources for the plugin-directory artwork: the owl (`hoobert-owl.png`, with `hoobert-owl.svg` as a fallback redraw) and the banner layout (`banner.html`). |
 | `.wordpress-org/`              | Generated directory assets (icons, banners, preview blueprint) plus hand-added screenshots. Copied to SVN `assets/` on release. |
 | `docs/wordpress-org-submission.md` | Everything needed to publish to the WordPress.org plugin directory.                              |
 

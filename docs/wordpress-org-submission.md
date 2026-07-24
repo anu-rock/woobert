@@ -41,9 +41,8 @@ It rasterises through headless Chrome, so there are no npm dependencies. Set
 
 | File | Size | Source | Status |
 | --- | --- | --- | --- |
-| `.wordpress-org/icon-128x128.png` | 128x128 | `assets-src/hoobert-owl.svg` | done |
+| `.wordpress-org/icon-128x128.png` | 128x128 | `assets-src/hoobert-owl.png` | done |
 | `.wordpress-org/icon-256x256.png` | 256x256 | same | done |
-| `.wordpress-org/icon.svg` | vector | same | done |
 | `.wordpress-org/banner-772x250.png` | 772x250 | `assets-src/banner.html` | done |
 | `.wordpress-org/banner-1544x500.png` | 1544x500 | same | done |
 | `.wordpress-org/screenshot-1..7.png` | any | shot by hand, see below | done |
@@ -51,11 +50,24 @@ It rasterises through headless Chrome, so there are no npm dependencies. Set
 
 ### About the owl
 
-`assets-src/hoobert-owl.svg` is a vector redraw of the "funny owl" icon by
-agustrisana on Flaticon, in the Fernfly palette. **If you have the original PNG,
-drop it in as `assets-src/hoobert-owl.png`** and re-run the build; the script
-prefers it for the icons automatically. The redraw exists so the pipeline works
-without it, not because it is better.
+`assets-src/hoobert-owl.png` is the original "funny owl" artwork by agustrisana
+on Flaticon. It is the mark for **every** output: the directory icons, the owl in
+the banner, and the copy shipped inside the plugin for the settings screen.
+
+`assets-src/hoobert-owl.svg` is a vector redraw in the Fernfly palette, kept only
+as a stand-in for when the original is missing. It is close but not identical, so
+the two must never appear in the same build. The script enforces that: whichever
+source it picks drives all outputs, and it prints which one it used.
+
+That is also why `.wordpress-org/icon.svg` is **not** committed. wp.org serves
+`icon.svg` to modern browsers with the PNGs as fallback, so shipping the redraw
+next to PNGs of the original would give the listing two different icons depending
+on the browser. The script emits `icon.svg` only when the redraw is the mark, and
+deletes it otherwise. SVG is optional in the wp.org spec; the PNGs are not.
+
+The plugin always ships `assets/hoobert-owl.png`, rasterised at 256px from
+whichever source applies, so `class-settings.php` has one predictable filename to
+reference.
 
 The Flaticon free licence requires attribution wherever the icon appears. It is
 in three places: the plugin settings screen (`Hoobert_Settings::render_credits`),

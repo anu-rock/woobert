@@ -118,7 +118,7 @@ class Hoobert_Settings {
 		?>
 		<div class="wrap">
 			<h1 class="hoobert-title">
-				<img src="<?php echo esc_url( HOOBERT_URL . 'assets/hoobert-owl.svg' ); ?>" alt="" width="40" height="40" />
+				<img src="<?php echo esc_url( HOOBERT_URL . 'assets/hoobert-owl.png' ); ?>" alt="" width="40" height="40" />
 				<?php esc_html_e( 'Hoobert', 'hoobert' ); ?>
 			</h1>
 			<style>
