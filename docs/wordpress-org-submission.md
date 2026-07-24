@@ -73,53 +73,6 @@ The Flaticon free licence requires attribution wherever the icon appears. It is
 in three places: the plugin settings screen (`Hoobert_Settings::render_credits`),
 `readme.txt`, and the repository README.
 
-### Screenshots
-
-`screenshot-1.png` through `screenshot-7.png` are committed. Filenames must stay
-lowercase and their numbering must match the captions in readme.txt's
-`== Screenshots ==` section, in order: invoke, resolved call, confirm, result,
-reports, settings, audit log.
-
-They were shot against the seeded demo store, driving the real plugin. If you
-re-shoot, these are the constraints worth preserving. Each one caused a bad frame
-the first time round:
-
-- **Only real states.** Never stage something the plugin cannot actually reach.
-  Shots 2 and 3 are the same modal in two states, because for a tool flagged
-  `x-woo.confirm` the preview *is* the confirm prompt; 2 opens the technical
-  disclosure, 3 shows the prompt as it first appears.
-- **Nothing destructive.** Capture the refund flow up to the confirm prompt and
-  dismiss it. Only run reads.
-- **The endpoint field is a published image.** Point `hoobert_options.endpoint`
-  at a placeholder project before shooting the settings screen, then restore it.
-  The API key field renders empty by design so the key is never in frame, but the
-  project id would otherwise be. Back the real option up **outside** the wpcli
-  container: it runs with `--rm`, so anything written to its `/tmp` is gone the
-  moment it exits, and restoring from a file that is not there will null the
-  option and take the API key with it.
-- **Only claim what works.** Shot 5 covers sales over a period because that is
-  the report that works end to end; top customers and top sellers do not.
-- **Frame the audit log from the top.** The table is newest-first, so centring it
-  lands arbitrarily in old history.
-- **Mind the chrome.** `blogname` shows in the admin bar of every full-viewport
-  shot, and core update nags and WooCommerce banners need hiding. Use the seeded
-  store so every customer name in frame is fake. Anything visible is public
-  forever.
-
-**Animated GIFs are not in the documented spec.** The assets page lists
-`screenshot-N.(png|jpg)`; GIF appears only in the icon formats. If you want motion
-on the listing, two options that definitely work:
-
-- **Live Preview.** `.wordpress-org/blueprints/blueprint.json` is committed, which
-  turns on the "Live Preview" button on the plugin page: a real, throwaway store
-  with WooCommerce, Hoobert, and sample data, running in the visitor's browser.
-  That beats a GIF. Note it still needs an endpoint and key to actually resolve a
-  command, so decide whether to point the preview at a rate-limited public Fernfly
-  project or let it demo the UI and settings only.
-- **Video embed.** readme.txt renders a bare YouTube or Vimeo URL on its own line
-  as an embedded player. A 30-second screen recording in the description reads
-  better than a GIF screenshot anyway.
-
 ## Compliance
 
 Verified by running WordPress.org's own tool against the plugin:
@@ -174,42 +127,6 @@ Three things changed during this pass, worth knowing about:
   Settings -> Privacy for merchants writing their own policy. Not required, but
   it is the expected courtesy for a plugin with an external service, and it saves
   a round of reviewer questions.
-
-## Before you submit
-
-- [ ] Finish the rename outside this repo. The code is done; these are not:
-      rename the GitHub repository to `hoobert` (redirects cover the old URLs, but
-      `releases/latest/download/hoobert.zip` only starts resolving after the next
-      release), point `hoobert.fernfly.com` somewhere, and rename the Fernfly
-      project label. The tool set itself needs no retraining: no tool name in
-      `tools.json` carried the old name.
-- [ ] Confirm `Contributors: anuragbhandari` is the wp.org account that will own
-      the listing. Add any co-maintainers now; the field is a comma-separated list
-      of wp.org usernames, not display names.
-- [ ] Verify `Requires at least: 6.6` on a real 6.6 install before submitting. The
-      floor is set by the front-end bundle, not by choice: `build/index.asset.php`
-      declares `react-jsx-runtime`, which core registers as a script handle in 6.6
-      (`wp-includes/script-loader.php`) and does not have in 6.5. On 6.5 the
-      enqueue silently drops the bundle and the command bar never appears, with no
-      error. **Do not lower it below 6.6** without changing the JSX build.
-      Note the practical floor is higher than the declared one: current WooCommerce
-      requires WP 6.9, so a merchant on 6.6 is necessarily on an older WooCommerce.
-      Hoobert declares `WC requires at least: 8.0`; the REST v3 routes it calls are
-      stable across WooCommerce 8.x to 10.x, but that pairing is the one to test.
-- [ ] Set `Tested up to` to the WordPress version you last ran it against (7.0.2
-      at time of writing). Reviewers do check this, and a stale value gets the
-      listing flagged as untested.
-- [ ] Shoot the screenshots and drop them in `.wordpress-org/`.
-- [ ] Confirm the Fernfly terms and privacy URLs are the ones you want linked
-      publicly: `https://fernfly.com/terms-of-service` and
-      `https://fernfly.com/privacy-policy`. Both currently resolve.
-- [ ] Decide the onboarding story. Right now a merchant has to create a Fernfly
-      project, import `tools.json`, train, and deploy before Hoobert does anything.
-      That is a real cliff between installing and first value, and it is the most
-      likely reason a good listing still gets uninstalled. A hosted, shared Hoobert
-      project that new users can point at with one click would remove it.
-- [ ] `npm run build` and confirm `build/` is current.
-- [ ] Re-run Plugin Check. Expect zero errors.
 
 ## Submitting
 
