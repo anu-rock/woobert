@@ -46,7 +46,7 @@ It rasterises through headless Chrome, so there are no npm dependencies. Set
 | `.wordpress-org/icon.svg` | vector | same | done |
 | `.wordpress-org/banner-772x250.png` | 772x250 | `assets-src/banner.html` | done |
 | `.wordpress-org/banner-1544x500.png` | 1544x500 | same | done |
-| `.wordpress-org/screenshot-1..8.png` | any | you | **to do** |
+| `.wordpress-org/screenshot-1..7.png` | any | shot by hand, see below | done |
 | `.wordpress-org/blueprints/blueprint.json` | - | hand-written | done |
 
 ### About the owl
@@ -63,16 +63,36 @@ in three places: the plugin settings screen (`Hoobert_Settings::render_credits`)
 
 ### Screenshots
 
-Filenames must be lowercase `screenshot-1.png` through `screenshot-N.png`, and the
-numbering must line up with the captions already written into readme.txt's
-`== Screenshots ==` section. The captions are ordered as a story: invoke, preview,
-confirm, result, page context, reports, settings, audit log. Reorder the captions
-if you shoot them in a different order.
+`screenshot-1.png` through `screenshot-7.png` are committed. Filenames must stay
+lowercase and their numbering must match the captions in readme.txt's
+`== Screenshots ==` section, in order: invoke, resolved call, confirm, result,
+reports, settings, audit log.
 
-Practical notes: shoot at 2x on a 1280-wide admin window, crop to the palette or
-modal rather than the whole screen, and use the seeded demo store so no real
-customer data appears. Anything with a customer name or email in it will be
-public forever.
+They were shot against the seeded demo store, driving the real plugin. If you
+re-shoot, these are the constraints worth preserving. Each one caused a bad frame
+the first time round:
+
+- **Only real states.** Never stage something the plugin cannot actually reach.
+  Shots 2 and 3 are the same modal in two states, because for a tool flagged
+  `x-woo.confirm` the preview *is* the confirm prompt; 2 opens the technical
+  disclosure, 3 shows the prompt as it first appears.
+- **Nothing destructive.** Capture the refund flow up to the confirm prompt and
+  dismiss it. Only run reads.
+- **The endpoint field is a published image.** Point `hoobert_options.endpoint`
+  at a placeholder project before shooting the settings screen, then restore it.
+  The API key field renders empty by design so the key is never in frame, but the
+  project id would otherwise be. Back the real option up **outside** the wpcli
+  container: it runs with `--rm`, so anything written to its `/tmp` is gone the
+  moment it exits, and restoring from a file that is not there will null the
+  option and take the API key with it.
+- **Only claim what works.** Shot 5 covers sales over a period because that is
+  the report that works end to end; top customers and top sellers do not.
+- **Frame the audit log from the top.** The table is newest-first, so centring it
+  lands arbitrarily in old history.
+- **Mind the chrome.** `blogname` shows in the admin bar of every full-viewport
+  shot, and core update nags and WooCommerce banners need hiding. Use the seeded
+  store so every customer name in frame is fake. Anything visible is public
+  forever.
 
 **Animated GIFs are not in the documented spec.** The assets page lists
 `screenshot-N.(png|jpg)`; GIF appears only in the icon formats. If you want motion

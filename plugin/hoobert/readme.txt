@@ -154,13 +154,12 @@ Yes. The repository has a [WordPress Playground](https://github.com/antelligent-
 == Screenshots ==
 
 1. Press Cmd/Ctrl-K anywhere in wp-admin, type in plain English, and pick "Ask Hoobert".
-2. Hoobert previews the action it resolved before running anything.
+2. The resolved action, with the exact call and arguments it will run.
 3. Destructive actions - refunds, deletes, status changes - need a confirm click.
 4. The result, rendered as a readable summary rather than raw JSON.
-5. On an order screen, "refund this order" resolves to the order you are looking at.
-6. Reports: top customers, top sellers, and sales over a period.
-7. Settings: connect your Fernfly project with an endpoint URL and API key.
-8. The store-wide audit log records every command, who ran it, and what it did.
+5. Reports: sales over a period, summarised in the palette.
+6. Settings: connect your Fernfly project with an endpoint URL and API key.
+7. The store-wide audit log records every command, who ran it, and what it did.
 
 == Changelog ==
 
