@@ -170,10 +170,16 @@ Three things changed during this pass, worth knowing about:
 - [ ] Confirm `Contributors: anuragbhandari` is the wp.org account that will own
       the listing. Add any co-maintainers now; the field is a comma-separated list
       of wp.org usernames, not display names.
-- [ ] Decide `Requires at least`. It is `7.0` today, which is the current release,
-      so the plugin is invisible to everyone who has not upgraded yet. WooCommerce
-      itself only requires 6.9, and the command palette has been in core since 6.3.
-      Lower it to whatever you have actually tested, and say so honestly.
+- [ ] Verify `Requires at least: 6.6` on a real 6.6 install before submitting. The
+      floor is set by the front-end bundle, not by choice: `build/index.asset.php`
+      declares `react-jsx-runtime`, which core registers as a script handle in 6.6
+      (`wp-includes/script-loader.php`) and does not have in 6.5. On 6.5 the
+      enqueue silently drops the bundle and the command bar never appears, with no
+      error. **Do not lower it below 6.6** without changing the JSX build.
+      Note the practical floor is higher than the declared one: current WooCommerce
+      requires WP 6.9, so a merchant on 6.6 is necessarily on an older WooCommerce.
+      Woobert declares `WC requires at least: 8.0`; the REST v3 routes it calls are
+      stable across WooCommerce 8.x to 10.x, but that pairing is the one to test.
 - [ ] Set `Tested up to` to the WordPress version you last ran it against (7.0.2
       at time of writing). Reviewers do check this, and a stale value gets the
       listing flagged as untested.

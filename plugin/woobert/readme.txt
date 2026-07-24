@@ -1,7 +1,7 @@
 === Woobert - AI Command Bar for WooCommerce ===
 Contributors: anuragbhandari
 Tags: woocommerce, ai, command palette, store management, productivity
-Requires at least: 7.0
+Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.0
 Requires Plugins: woocommerce

@@ -4,7 +4,7 @@
  * Plugin URI:        https://woobert.fernfly.com
  * Description:       Agentic command bar for WooCommerce merchants. Get stuff done at the speed of thought.
  * Version:           0.1.2
- * Requires at least: 7.0
+ * Requires at least: 6.6
  * Requires PHP:      8.0
  * Requires Plugins:  woocommerce
  * Author:            Fernfly
