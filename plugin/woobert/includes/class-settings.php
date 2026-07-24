@@ -90,7 +90,14 @@ class Woobert_Settings {
 		$opts = self::opts();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Woobert', 'woobert' ); ?></h1>
+			<h1 class="woobert-title">
+				<img src="<?php echo esc_url( WOOBERT_URL . 'assets/woobert-owl.svg' ); ?>" alt="" width="40" height="40" />
+				<?php esc_html_e( 'Woobert', 'woobert' ); ?>
+			</h1>
+			<style>
+				.woobert-title { display: flex; align-items: center; gap: 10px; }
+				.woobert-credit { margin-top: 32px; color: #646970; font-size: 12px; }
+			</style>
 			<div class="card">
 				<p><strong><?php esc_html_e( 'Run your whole store from one prompt.', 'woobert' ); ?></strong></p>
 				<p>
@@ -125,7 +132,19 @@ class Woobert_Settings {
 				<?php submit_button(); ?>
 			</form>
 			<?php self::render_history(); ?>
+			<?php self::render_credits(); ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Artwork attribution, required by the icon's Flaticon licence.
+	 */
+	public static function render_credits(): void {
+		?>
+		<p class="woobert-credit">
+			<a href="https://www.flaticon.com/free-icons/funny-owl" title="funny owl icons" target="_blank" rel="noreferrer">Funny owl icons created by agustrisana - Flaticon</a>
+		</p>
 		<?php
 	}
 

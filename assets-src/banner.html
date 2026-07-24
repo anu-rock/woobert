@@ -1,0 +1,183 @@
+<!doctype html>
+<!--
+  Source for the WordPress.org header banner. Rendered to
+  .wordpress-org/banner-1544x500.png (and the 772x250 downscale) by
+  scripts/build-wporg-assets.mjs. Edit here, never the PNGs.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --ink:    #2E2418;
+    --muted:  #7C6B52;
+    --ochre:  #A87C2C;
+    --orange: #F79021;
+    --cream:  #F2E7D7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1544px;
+    height: 500px;
+    overflow: hidden;
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1100px 700px at 88% 42%, #FFFFFF 0%, rgba(255,255,255,0) 62%),
+      linear-gradient(122deg, #FDFAF4 0%, #F7EEDD 46%, #F1E3CC 100%);
+    position: relative;
+  }
+
+  /* Faint diagonal weave, so the flat background has some tooth. */
+  body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(58deg, rgba(168,124,44,.055) 0 1px, transparent 1px 26px);
+  }
+
+  .stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 92px;
+    gap: 64px;
+  }
+
+  .copy { flex: 1 1 auto; }
+
+  .wordmark {
+    font-size: 92px;
+    font-weight: 800;
+    letter-spacing: -3.2px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .wordmark .dot { color: var(--orange); }
+
+  .tagline {
+    margin-top: 16px;
+    font-size: 31px;
+    font-weight: 500;
+    letter-spacing: -.4px;
+    color: var(--muted);
+  }
+
+  /* Mock of the WordPress command palette mid-query. */
+  .palette {
+    margin-top: 34px;
+    width: 726px;
+    background: #fff;
+    border: 1px solid rgba(46,36,24,.10);
+    border-radius: 16px;
+    box-shadow: 0 22px 44px -18px rgba(78,56,20,.34), 0 2px 6px rgba(78,56,20,.07);
+    overflow: hidden;
+  }
+
+  .palette .input {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 22px;
+    font-size: 25px;
+    letter-spacing: -.3px;
+  }
+  .palette .kbd {
+    flex: none;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--muted);
+    background: #F4EFE6;
+    border: 1px solid rgba(46,36,24,.10);
+    border-radius: 7px;
+    padding: 4px 10px;
+  }
+  .palette .typed { color: var(--ink); font-weight: 500; }
+  .palette .caret {
+    width: 2px;
+    height: 27px;
+    background: var(--orange);
+    border-radius: 2px;
+  }
+
+  .palette .result {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 17px 22px;
+    font-size: 23px;
+    font-weight: 600;
+    letter-spacing: -.3px;
+    background: linear-gradient(90deg, rgba(247,144,33,.16), rgba(247,144,33,.05));
+    border-top: 1px solid rgba(46,36,24,.08);
+  }
+  .palette .result img { width: 30px; height: 30px; flex: none; }
+  .palette .result .enter {
+    margin-left: auto;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .footnote {
+    margin-top: 26px;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: -.1px;
+  }
+  .footnote b { color: var(--ochre); font-weight: 700; }
+
+  .mark {
+    flex: none;
+    position: relative;
+    width: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mark::before {
+    content: "";
+    position: absolute;
+    width: 440px;
+    height: 440px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,.45) 52%, rgba(255,255,255,0) 72%);
+  }
+  .mark img {
+    position: relative;
+    width: 376px;
+    height: 376px;
+    filter: drop-shadow(0 26px 34px rgba(94,66,18,.22));
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="copy">
+      <div class="wordmark">Woobert<span class="dot">.</span></div>
+      <div class="tagline">Run your whole store from one prompt.</div>
+
+      <div class="palette">
+        <div class="input">
+          <span class="kbd">&#8984;K</span>
+          <span class="typed">refund order 1042</span>
+          <span class="caret"></span>
+        </div>
+        <div class="result">
+          <img src="woobert-owl.svg" alt="">
+          <span>Ask Woobert: &ldquo;refund order 1042&rdquo;</span>
+          <span class="enter">&#8629; Enter</span>
+        </div>
+      </div>
+
+      <div class="footnote">Plain English in, WooCommerce actions out. Powered by <b>Fern</b>.</div>
+    </div>
+
+    <div class="mark"><img src="woobert-owl.svg" alt=""></div>
+  </div>
+</body>
+</html>
