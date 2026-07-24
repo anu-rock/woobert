@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       Woobert
- * Plugin URI:        https://woobert.fernfly.com
+ * Plugin Name:       Hoobert
+ * Plugin URI:        https://hoobert.fernfly.com
  * Description:       Agentic command bar for WooCommerce merchants. Get stuff done at the speed of thought.
  * Version:           0.1.2
  * Requires at least: 6.6
@@ -11,12 +11,12 @@
  * Author URI:        https://fernfly.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       woobert
+ * Text Domain:       hoobert
  * WC requires at least: 8.0
  *
- * @package Woobert
+ * @package Hoobert
  *
- * Press Cmd/Ctrl-K anywhere in wp-admin, type a request in plain English, and Woobert
+ * Press Cmd/Ctrl-K anywhere in wp-admin, type a request in plain English, and Hoobert
  * maps it to a WooCommerce REST API v3 tool call and runs it, server-side, under the
  * current admin's capabilities. The natural-language step is handled by a small
  * function-calling model (Fern); tool schemas live in tools.json.
@@ -26,19 +26,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'WOOBERT_VERSION', '0.1.2' );
-define( 'WOOBERT_PATH', plugin_dir_path( __FILE__ ) );
-define( 'WOOBERT_URL', plugin_dir_url( __FILE__ ) );
+define( 'HOOBERT_VERSION', '0.1.2' );
+define( 'HOOBERT_PATH', plugin_dir_path( __FILE__ ) );
+define( 'HOOBERT_URL', plugin_dir_url( __FILE__ ) );
 
-require_once WOOBERT_PATH . 'includes/class-tools.php';
-require_once WOOBERT_PATH . 'includes/class-executor.php';
-require_once WOOBERT_PATH . 'includes/class-fern-client.php';
-require_once WOOBERT_PATH . 'includes/class-history.php';
-require_once WOOBERT_PATH . 'includes/class-rest-proxy.php';
-require_once WOOBERT_PATH . 'includes/class-settings.php';
+require_once HOOBERT_PATH . 'includes/class-tools.php';
+require_once HOOBERT_PATH . 'includes/class-executor.php';
+require_once HOOBERT_PATH . 'includes/class-fern-client.php';
+require_once HOOBERT_PATH . 'includes/class-history.php';
+require_once HOOBERT_PATH . 'includes/class-rest-proxy.php';
+require_once HOOBERT_PATH . 'includes/class-settings.php';
+require_once HOOBERT_PATH . 'includes/class-migrate.php';
 
-// Create the history table on activation (and lazily on upgrade, see below).
-register_activation_hook( __FILE__, array( 'Woobert_History', 'install' ) );
+/**
+ * Create the history table on activation (and lazily on upgrade, see below),
+ * then adopt anything left behind by the plugin's former name.
+ */
+register_activation_hook(
+	__FILE__,
+	function () {
+		Hoobert_History::install();
+		Hoobert_Migrate::maybe_adopt_legacy_data();
+	}
+);
 
 /**
  * Boot the plugin once all plugins are loaded, so we can detect WooCommerce.
@@ -50,15 +60,15 @@ add_action(
 			add_action(
 				'admin_notices',
 				function () {
-					echo '<div class="notice notice-error"><p>' . esc_html__( 'Woobert requires WooCommerce to be active.', 'woobert' ) . '</p></div>';
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'Hoobert requires WooCommerce to be active.', 'hoobert' ) . '</p></div>';
 				}
 			);
 			return;
 		}
 
-		Woobert_History::maybe_install();
-		Woobert_Settings::init();
-		( new Woobert_Rest_Proxy() )->register();
+		Hoobert_History::maybe_install();
+		Hoobert_Settings::init();
+		( new Hoobert_Rest_Proxy() )->register();
 	}
 );
 
@@ -74,36 +84,36 @@ add_action(
 			return;
 		}
 
-		$asset_file = WOOBERT_PATH . 'build/index.asset.php';
+		$asset_file = HOOBERT_PATH . 'build/index.asset.php';
 		$asset      = file_exists( $asset_file )
 			? require $asset_file
 			: array(
 				'dependencies' => array( 'wp-commands', 'wp-data', 'wp-element' ),
-				'version'      => WOOBERT_VERSION,
+				'version'      => HOOBERT_VERSION,
 			);
 
 		wp_enqueue_script(
-			'woobert',
-			WOOBERT_URL . 'build/index.js',
+			'hoobert',
+			HOOBERT_URL . 'build/index.js',
 			$asset['dependencies'],
 			$asset['version'],
 			true
 		);
 
 		wp_enqueue_style(
-			'woobert',
-			WOOBERT_URL . 'build/style-index.css',
+			'hoobert',
+			HOOBERT_URL . 'build/style-index.css',
 			array(),
 			$asset['version']
 		);
 
 		wp_localize_script(
-			'woobert',
-			'woobert',
+			'hoobert',
+			'hoobert',
 			array(
-				'root'    => esc_url_raw( rest_url( 'woobert/v1' ) ),
+				'root'    => esc_url_raw( rest_url( 'hoobert/v1' ) ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
-				'context' => Woobert_Rest_Proxy::current_page_context(),
+				'context' => Hoobert_Rest_Proxy::current_page_context(),
 			)
 		);
 	}

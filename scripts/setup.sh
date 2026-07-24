@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# Provisions the local Woobert development stack. Runs inside the wpcli container
+# Provisions the local Hoobert development stack. Runs inside the wpcli container
 # on `docker compose up` (see docker-compose.yml) and is safe to re-run: every
 # step checks state first. Re-run on demand (e.g. after building the plugin) with
 #   docker compose run --rm wpcli
 #
-# It installs WordPress + WooCommerce into the shared volume, activates Woobert
+# It installs WordPress + WooCommerce into the shared volume, activates Hoobert
 # (build the JS bundle first), seeds sample data, and mints a WooCommerce REST
 # API key pair, printing the credentials to this container's log.
 set -eu
@@ -15,7 +15,7 @@ SITE_URL="${WP_SITE_URL:-http://localhost:8080}"
 ADMIN_USER="${WP_ADMIN_USER:-admin}"
 ADMIN_PASS="${WP_ADMIN_PASSWORD:-admin_password}"
 ADMIN_EMAIL="${WP_ADMIN_EMAIL:-admin@example.com}"
-SITE_TITLE="${WP_SITE_TITLE:-Woobert Dev Store}"
+SITE_TITLE="${WP_SITE_TITLE:-Hoobert Dev Store}"
 
 cd "$WP_PATH"
 
@@ -60,10 +60,10 @@ wp option update woocommerce_onboarding_profile '{"completed":true}' --format=js
 # Enable the legacy REST reports the sales/top-seller tools use.
 wp option update woocommerce_analytics_enabled "yes" >/dev/null || true
 
-echo "==> Activating Woobert…"
-if ! wp plugin activate woobert 2>/dev/null; then
-	echo "!! Woobert did not activate. Build the JS bundle, then re-run provisioning:"
-	echo "   (cd plugin/woobert && npm install && npm run build) && docker compose run --rm wpcli"
+echo "==> Activating Hoobert…"
+if ! wp plugin activate hoobert 2>/dev/null; then
+	echo "!! Hoobert did not activate. Build the JS bundle, then re-run provisioning:"
+	echo "   (cd plugin/hoobert && npm install && npm run build) && docker compose run --rm wpcli"
 fi
 
 echo "==> Seeding sample data…"
@@ -77,5 +77,5 @@ echo "==> Done."
 echo "    Store:  ${SITE_URL}"
 echo "    Admin:  ${SITE_URL}/wp-admin  (${ADMIN_USER} / ${ADMIN_PASS})"
 echo
-echo "    Set the inference endpoint URL + API key under WooCommerce → Woobert,"
+echo "    Set the inference endpoint URL + API key under WooCommerce → Hoobert,"
 echo "    then press Cmd/Ctrl-K in wp-admin."

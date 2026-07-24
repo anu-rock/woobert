@@ -1,10 +1,10 @@
 /**
- * Woobert query-history modal.
+ * Hoobert query-history modal.
  *
- * Opened from the "Woobert: Query history" command. Lists the merchant's most
+ * Opened from the "Hoobert: Query history" command. Lists the merchant's most
  * recent executed commands (newest first): the natural-language query, the
  * WooCommerce REST request it ran, whether it succeeded, and any error. Data
- * comes from the woobert/v1 proxy (api.js); it shares the .woobert-* styling.
+ * comes from the hoobert/v1 proxy (api.js); it shares the .hoobert-* styling.
  */
 
 import { useState, useEffect, useCallback, Fragment } from '@wordpress/element';
@@ -43,11 +43,11 @@ function ArgsList( { params } ) {
 		return null;
 	}
 	return (
-		<details className="woobert-history-args">
+		<details className="hoobert-history-args">
 			<summary>
 				{ names.length } argument{ names.length === 1 ? '' : 's' }
 			</summary>
-			<dl className="woobert-fields">
+			<dl className="hoobert-fields">
 				{ names.map( ( name ) => (
 					<Fragment key={ name }>
 						<dt>{ name }</dt>
@@ -65,13 +65,13 @@ function ArgsList( { params } ) {
 function HistoryEntry( { entry } ) {
 	const { method, route, params } = entry.request || {};
 	return (
-		<li className="woobert-history-item">
-			<div className="woobert-history-top">
-				<span className="woobert-history-query">
+		<li className="hoobert-history-item">
+			<div className="hoobert-history-top">
+				<span className="hoobert-history-query">
 					{ entry.query || <em>(no query)</em> }
 				</span>
 				<span
-					className={ `woobert-badge ${
+					className={ `hoobert-badge ${
 						entry.ok ? 'is-ok' : 'is-error'
 					}` }
 				>
@@ -82,19 +82,19 @@ function HistoryEntry( { entry } ) {
 						  }` }
 				</span>
 			</div>
-			<div className="woobert-history-req">
-				<code className="woobert-call-name">{ entry.tool }</code>
+			<div className="hoobert-history-req">
+				<code className="hoobert-call-name">{ entry.tool }</code>
 				{ ( method || route ) && (
-					<span className="woobert-history-route">
+					<span className="hoobert-history-route">
 						{ method } { route }
 					</span>
 				) }
 			</div>
 			{ ! entry.ok && entry.error && (
-				<p className="woobert-history-error">{ entry.error }</p>
+				<p className="hoobert-history-error">{ entry.error }</p>
 			) }
 			<ArgsList params={ params } />
-			<span className="woobert-history-time">
+			<span className="hoobert-history-time">
 				{ formatTime( entry.time ) }
 			</span>
 		</li>
@@ -107,7 +107,7 @@ function HistoryEntry( { entry } ) {
  * @param {Object}   props
  * @param {Function} props.onClose Close/dismiss the modal.
  */
-export function WoobertHistoryModal( { onClose } ) {
+export function HoobertHistoryModal( { onClose } ) {
 	const [ state, setState ] = useState( { phase: 'loading' } );
 
 	const load = useCallback( async () => {
@@ -139,35 +139,35 @@ export function WoobertHistoryModal( { onClose } ) {
 
 	return (
 		<div
-			className="woobert-positioner"
+			className="hoobert-positioner"
 			onMouseDown={ ( e ) => {
 				if ( e.target === e.currentTarget ) {
 					onClose();
 				}
 			} }
 		>
-			<div className="woobert-animator">
-				<div className="woobert-flow-head">Woobert history</div>
-				<div className="woobert-panel">
+			<div className="hoobert-animator">
+				<div className="hoobert-flow-head">Hoobert history</div>
+				<div className="hoobert-panel">
 					{ state.phase === 'loading' && (
-						<p className="woobert-status">Loading…</p>
+						<p className="hoobert-status">Loading…</p>
 					) }
 
 					{ state.phase === 'error' && (
-						<p className="woobert-status is-error">
+						<p className="hoobert-status is-error">
 							{ state.error }
 						</p>
 					) }
 
 					{ state.phase === 'ready' && entries.length === 0 && (
-						<p className="woobert-status">
-							No commands yet. Press ⌘K / Ctrl-K and ask Woobert
+						<p className="hoobert-status">
+							No commands yet. Press ⌘K / Ctrl-K and ask Hoobert
 							to do something.
 						</p>
 					) }
 
 					{ state.phase === 'ready' && entries.length > 0 && (
-						<ul className="woobert-history-list">
+						<ul className="hoobert-history-list">
 							{ entries.map( ( entry, i ) => (
 								<HistoryEntry key={ i } entry={ entry } />
 							) ) }

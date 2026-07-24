@@ -9,8 +9,8 @@
  *   banner-772x250.png  banner-1544x500.png
  *
  * Sources:
- *   assets-src/woobert-owl.svg  - the owl mark (vector)
- *   assets-src/woobert-owl.png  - optional; the original raster art. When
+ *   assets-src/hoobert-owl.svg  - the owl mark (vector)
+ *   assets-src/hoobert-owl.png  - optional; the original raster art. When
  *                                 present it is used for the icons instead of
  *                                 the SVG, so the shipped icon is the artist's
  *                                 file rather than our vector redraw.
@@ -33,7 +33,7 @@ import { tmpdir } from 'node:os';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'assets-src');
 const out = join(root, '.wordpress-org');
-const shipped = join(root, 'plugin', 'woobert', 'assets');
+const shipped = join(root, 'plugin', 'hoobert', 'assets');
 
 const CHROME_CANDIDATES = [
 	'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -98,17 +98,17 @@ function main() {
 	mkdirSync( out, { recursive: true } );
 	mkdirSync( shipped, { recursive: true } );
 
-	const owlSvg = join( src, 'woobert-owl.svg' );
-	const owlPng = join( src, 'woobert-owl.png' );
+	const owlSvg = join( src, 'hoobert-owl.svg' );
+	const owlPng = join( src, 'hoobert-owl.png' );
 	if ( ! existsSync( owlSvg ) ) {
 		throw new Error( `Missing ${ owlSvg }` );
 	}
 
 	// Prefer the original raster art for the icons when it has been dropped in.
-	const iconSource = existsSync( owlPng ) ? 'woobert-owl.png' : 'woobert-owl.svg';
+	const iconSource = existsSync( owlPng ) ? 'hoobert-owl.png' : 'hoobert-owl.svg';
 	console.log( `Icon source: assets-src/${ iconSource }` );
 
-	const scratch = join( tmpdir(), `woobert-assets-${ process.pid }` );
+	const scratch = join( tmpdir(), `hoobert-assets-${ process.pid }` );
 	mkdirSync( scratch, { recursive: true } );
 
 	try {
@@ -129,8 +129,8 @@ function main() {
 		console.log( '  .wordpress-org/icon.svg' );
 
 		// The same mark ships inside the plugin, for the settings screen.
-		copyFileSync( owlSvg, join( shipped, 'woobert-owl.svg' ) );
-		console.log( '  plugin/woobert/assets/woobert-owl.svg' );
+		copyFileSync( owlSvg, join( shipped, 'hoobert-owl.svg' ) );
+		console.log( '  plugin/hoobert/assets/hoobert-owl.svg' );
 
 		// Banner: render retina, halve for the standard size.
 		shoot(

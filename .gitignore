@@ -7,7 +7,7 @@ CLAUDE.local.md
 
 # Node / build output
 node_modules/
-plugin/woobert/build/
+plugin/hoobert/build/
 
 # OS / editor
 .DS_Store

@@ -1,11 +1,11 @@
 /**
- * Standalone Woobert flow modal.
+ * Standalone Hoobert flow modal.
  *
  * The native WordPress command palette closes as soon as a command's callback
- * runs and offers no surface to render progress. So once "Ask Woobert" is
+ * runs and offers no surface to render progress. So once "Ask Hoobert" is
  * selected there, we drive the resolve -> (confirm) -> execute -> result flow in
- * this self-contained modal instead. It reuses the woobert/v1 proxy (api.js) and
- * the shared .woobert-* styling.
+ * this self-contained modal instead. It reuses the hoobert/v1 proxy (api.js) and
+ * the shared .hoobert-* styling.
  */
 
 import { useState, useEffect, useCallback, Fragment } from '@wordpress/element';
@@ -36,7 +36,7 @@ function highlightJson( value ) {
 			} else if ( /null/.test( match ) ) {
 				cls = 'null';
 			}
-			return `<span class="woobert-json-${ cls }">${ match }</span>`;
+			return `<span class="hoobert-json-${ cls }">${ match }</span>`;
 		}
 	);
 }
@@ -48,7 +48,7 @@ function highlightJson( value ) {
 function JsonBlock( { value } ) {
 	return (
 		<pre
-			className="woobert-call-args"
+			className="hoobert-call-args"
 			// eslint-disable-next-line react/no-danger
 			dangerouslySetInnerHTML={ { __html: highlightJson( value ) } }
 		/>
@@ -60,8 +60,8 @@ function JsonBlock( { value } ) {
  */
 function CallPreview( { call } ) {
 	return (
-		<div className="woobert-call">
-			<code className="woobert-call-name">{ call.name }</code>
+		<div className="hoobert-call">
+			<code className="hoobert-call-name">{ call.name }</code>
 			<JsonBlock value={ call.arguments } />
 		</div>
 	);
@@ -100,7 +100,7 @@ function ConfirmMessage( { call, prompt } ) {
 		  ) }, which adds or updates data in your store.`
 		: 'This will add or update data in your store.';
 	return (
-		<p className="woobert-confirm-message">
+		<p className="hoobert-confirm-message">
 			{ sentence }
 			{ prompt ? ' Do you want to run it?' : '' }
 		</p>
@@ -115,15 +115,15 @@ function ConfirmMessage( { call, prompt } ) {
 function DisplayView( { display } ) {
 	if ( display.type === 'list' ) {
 		if ( ! display.rows.length ) {
-			return <p className="woobert-result-summary">{ display.empty }</p>;
+			return <p className="hoobert-result-summary">{ display.empty }</p>;
 		}
 		return (
-			<div className="woobert-result">
-				<p className="woobert-result-summary">
+			<div className="hoobert-result">
+				<p className="hoobert-result-summary">
 					{ display.count } result
 					{ display.count === 1 ? '' : 's' }
 				</p>
-				<table className="woobert-table">
+				<table className="hoobert-table">
 					<thead>
 						<tr>
 							{ display.columns.map( ( col ) => (
@@ -146,11 +146,11 @@ function DisplayView( { display } ) {
 	}
 
 	return (
-		<div className="woobert-result">
+		<div className="hoobert-result">
 			{ display.title && (
-				<p className="woobert-result-title">{ display.title }</p>
+				<p className="hoobert-result-title">{ display.title }</p>
 			) }
-			<dl className="woobert-fields">
+			<dl className="hoobert-fields">
 				{ display.rows.map( ( row ) => (
 					<Fragment key={ row.label }>
 						<dt>{ row.label }</dt>
@@ -179,8 +179,8 @@ function ResultPreview( { result } ) {
 		summary = data.id ? `#${ data.id }` : 'ok';
 	}
 	return (
-		<div className="woobert-result">
-			{ summary && <p className="woobert-result-summary">{ summary }</p> }
+		<div className="hoobert-result">
+			{ summary && <p className="hoobert-result-summary">{ summary }</p> }
 			<JsonBlock value={ data } />
 		</div>
 	);
@@ -193,34 +193,34 @@ function ResultPreview( { result } ) {
  */
 function DebugInfo( { call, result, error, response } ) {
 	return (
-		<details className="woobert-debug">
+		<details className="hoobert-debug">
 			<summary>Debug info</summary>
-			<div className="woobert-debug-body">
+			<div className="hoobert-debug-body">
 				{ call && (
 					<Fragment>
-						<p className="woobert-debug-label">Fern returned</p>
+						<p className="hoobert-debug-label">Fern returned</p>
 						<CallPreview call={ call } />
 					</Fragment>
 				) }
 				{ result?.request && (
 					<Fragment>
-						<p className="woobert-debug-label">Executor ran</p>
+						<p className="hoobert-debug-label">Executor ran</p>
 						<JsonBlock value={ result.request } />
 					</Fragment>
 				) }
 				{ response !== undefined && (
 					<Fragment>
-						<p className="woobert-debug-label">Response</p>
+						<p className="hoobert-debug-label">Response</p>
 						<JsonBlock value={ response } />
 					</Fragment>
 				) }
 				{ result?.status != null && (
-					<p className="woobert-debug-line">
+					<p className="hoobert-debug-line">
 						HTTP status: { result.status }
 					</p>
 				) }
 				{ error && (
-					<p className="woobert-debug-line">Error: { error }</p>
+					<p className="hoobert-debug-line">Error: { error }</p>
 				) }
 			</div>
 		</details>
@@ -228,13 +228,13 @@ function DebugInfo( { call, result, error, response } ) {
 }
 
 /**
- * Modal that runs one Woobert request end to end for the given query.
+ * Modal that runs one Hoobert request end to end for the given query.
  *
  * @param {Object}   props
  * @param {string}   props.query   The merchant utterance selected in the palette.
  * @param {Function} props.onClose Close/dismiss the modal.
  */
-export function WoobertFlowModal( { query, onClose } ) {
+export function HoobertFlowModal( { query, onClose } ) {
 	const [ flow, setFlow ] = useState( { phase: 'resolving' } );
 
 	const doExecute = useCallback(
@@ -270,7 +270,7 @@ export function WoobertFlowModal( { query, onClose } ) {
 				if ( ! call ) {
 					setFlow( {
 						phase: 'error',
-						error: reply || 'Woobert found no matching action.',
+						error: reply || 'Hoobert found no matching action.',
 					} );
 					return;
 				}
@@ -303,27 +303,27 @@ export function WoobertFlowModal( { query, onClose } ) {
 
 	return (
 		<div
-			className="woobert-positioner"
+			className="hoobert-positioner"
 			onMouseDown={ ( e ) => {
 				if ( e.target === e.currentTarget ) {
 					onClose();
 				}
 			} }
 		>
-			<div className="woobert-animator">
-				<div className="woobert-flow-head">
-					Ask Woobert: <span className="q">“{ query }”</span>
+			<div className="hoobert-animator">
+				<div className="hoobert-flow-head">
+					Ask Hoobert: <span className="q">“{ query }”</span>
 				</div>
-				<div className="woobert-panel">
+				<div className="hoobert-panel">
 					{ flow.phase === 'resolving' && (
-						<p className="woobert-status">Thinking…</p>
+						<p className="hoobert-status">Thinking…</p>
 					) }
 
 					{ ( flow.phase === 'confirm' ||
 						flow.phase === 'executing' ) &&
 						flow.call && (
 							<Fragment>
-								<p className="woobert-status">
+								<p className="hoobert-status">
 									{ flow.phase === 'executing'
 										? 'Running…'
 										: 'Confirm this action' }
@@ -334,16 +334,16 @@ export function WoobertFlowModal( { query, onClose } ) {
 										prompt={ flow.phase === 'confirm' }
 									/>
 								) }
-								<details className="woobert-debug">
+								<details className="hoobert-debug">
 									<summary>Technical details</summary>
-									<div className="woobert-debug-body">
+									<div className="hoobert-debug-body">
 										<CallPreview call={ flow.call } />
 									</div>
 								</details>
 								{ flow.phase === 'confirm' && (
-									<div className="woobert-actions">
+									<div className="hoobert-actions">
 										<button
-											className="woobert-btn is-primary"
+											className="hoobert-btn is-primary"
 											onClick={ () =>
 												doExecute( flow.call )
 											}
@@ -351,7 +351,7 @@ export function WoobertFlowModal( { query, onClose } ) {
 											Run
 										</button>
 										<button
-											className="woobert-btn"
+											className="hoobert-btn"
 											onClick={ onClose }
 										>
 											Cancel
@@ -381,7 +381,7 @@ export function WoobertFlowModal( { query, onClose } ) {
 							// A tool ran and failed: keep the merchant message generic,
 							// tuck the real error + status into debug info.
 							<Fragment>
-								<p className="woobert-status is-error">
+								<p className="hoobert-status is-error">
 									An error occurred.
 								</p>
 								<DebugInfo
@@ -393,7 +393,7 @@ export function WoobertFlowModal( { query, onClose } ) {
 						) : (
 							// No tool ran (e.g. no matching action): the message is
 							// already merchant-friendly, so show it as-is.
-							<p className="woobert-status is-error">
+							<p className="hoobert-status is-error">
 								{ flow.error }
 							</p>
 						) ) }

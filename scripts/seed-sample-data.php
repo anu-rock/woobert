@@ -6,10 +6,10 @@
  * in every status the tool set exposes, partial and full refunds, product reviews
  * (including one awaiting moderation), and two coupons.
  *
- * Every seeded object is recorded in the `woobert_seed_index` option, so re-runs
+ * Every seeded object is recorded in the `hoobert_seed_index` option, so re-runs
  * adopt what already exists instead of duplicating it. Keying on the index rather
  * than on user-editable fields (SKU, title) means a merchant editing a seeded
- * product through Woobert cannot cause the next run to create a second copy.
+ * product through Hoobert cannot cause the next run to create a second copy.
  *
  * Single source of truth for two environments:
  *   - Local dev via WP-CLI (WordPress already bootstrapped):
@@ -17,7 +17,7 @@
  *   - WordPress Playground, fetched into the VFS and required by blueprint/blueprint.json
  *     (see that file's writeFile + runPHP steps).
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 // Playground's runPHP starts with no WordPress loaded; WP-CLI eval-file already did.
@@ -34,16 +34,16 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 
 // A fresh WooCommerce activation sets a one-time redirect transient that fires on the
 // next admin request. Under Playground it would bounce the blueprint's landingPage to
-// the WooCommerce home screen instead of Woobert, so clear it. Harmless under WP-CLI.
+// the WooCommerce home screen instead of Hoobert, so clear it. Harmless under WP-CLI.
 delete_transient( '_wc_activation_redirect' );
 
-defined( 'WOOBERT_SEED_INDEX' ) || define( 'WOOBERT_SEED_INDEX', 'woobert_seed_index' );
-defined( 'WOOBERT_SEED_GATEWAY' ) || define( 'WOOBERT_SEED_GATEWAY', 'woobert_sample' );
+defined( 'HOOBERT_SEED_INDEX' ) || define( 'HOOBERT_SEED_INDEX', 'hoobert_seed_index' );
+defined( 'HOOBERT_SEED_GATEWAY' ) || define( 'HOOBERT_SEED_GATEWAY', 'hoobert_sample' );
 
 /**
  * Log a line only when running under WP-CLI; stays silent in Playground.
  */
-function woobert_seed_log( string $message ): void {
+function hoobert_seed_log( string $message ): void {
 	if ( class_exists( 'WP_CLI' ) ) {
 		WP_CLI::log( $message );
 	}
@@ -53,18 +53,18 @@ function woobert_seed_log( string $message ): void {
  * Look up an object previously created by this seeder. Returns 0 when the key is
  * unknown or the object it pointed at has since been deleted.
  */
-function woobert_seed_id( string $key ): int {
-	$index = get_option( WOOBERT_SEED_INDEX, array() );
+function hoobert_seed_id( string $key ): int {
+	$index = get_option( HOOBERT_SEED_INDEX, array() );
 	return isset( $index[ $key ] ) ? (int) $index[ $key ] : 0;
 }
 
 /**
  * Record an object under a stable seed key and return its id unchanged.
  */
-function woobert_seed_remember( string $key, int $id ): int {
-	$index         = get_option( WOOBERT_SEED_INDEX, array() );
+function hoobert_seed_remember( string $key, int $id ): int {
+	$index         = get_option( HOOBERT_SEED_INDEX, array() );
 	$index[ $key ] = $id;
-	update_option( WOOBERT_SEED_INDEX, $index, false );
+	update_option( HOOBERT_SEED_INDEX, $index, false );
 	return $id;
 }
 
@@ -72,15 +72,15 @@ function woobert_seed_remember( string $key, int $id ): int {
  * Resolve a seeded post, verifying it still exists. Falls back to adopting a
  * matching SKU so stores seeded by an earlier version are not duplicated.
  */
-function woobert_seed_post( string $key, string $sku = '' ): int {
-	$id = woobert_seed_id( $key );
+function hoobert_seed_post( string $key, string $sku = '' ): int {
+	$id = hoobert_seed_id( $key );
 	if ( $id && get_post( $id ) ) {
 		return $id;
 	}
 	if ( '' !== $sku ) {
 		$existing = wc_get_product_id_by_sku( $sku );
 		if ( $existing ) {
-			return woobert_seed_remember( $key, (int) $existing );
+			return hoobert_seed_remember( $key, (int) $existing );
 		}
 	}
 	return 0;
@@ -90,7 +90,7 @@ function woobert_seed_post( string $key, string $sku = '' ): int {
  * A timestamp N days ago, at a fixed hour, so re-runs on the same day are stable.
  * A negative $days moves into the future, which coupon expiry dates rely on.
  */
-function woobert_days_ago( int $days, int $hour = 11 ): int {
+function hoobert_days_ago( int $days, int $hour = 11 ): int {
 	$day = gmdate( 'Y-m-d', time() - ( $days * DAY_IN_SECONDS ) );
 	return (int) strtotime( $day . sprintf( ' %02d:20:00', $hour ) );
 }
@@ -107,7 +107,7 @@ function woobert_days_ago( int $days, int $hour = 11 ): int {
  * on every request, not just while seeding, so this is written to mu-plugins
  * rather than hooked here. It belongs to the sample dataset, not to the plugin.
  */
-function woobert_install_sample_gateway(): void {
+function hoobert_install_sample_gateway(): void {
 	$dir = defined( 'WPMU_PLUGIN_DIR' ) ? WPMU_PLUGIN_DIR : WP_CONTENT_DIR . '/mu-plugins';
 	if ( ! is_dir( $dir ) ) {
 		wp_mkdir_p( $dir );
@@ -116,22 +116,22 @@ function woobert_install_sample_gateway(): void {
 	$source = <<<'PHP'
 <?php
 /**
- * Plugin Name: Woobert Sample Payments
- * Description: A payment gateway that approves payments and refunds locally, installed by Woobert's sample-data seeder so refund journeys work on a store with no real gateway. Not part of the Woobert plugin.
+ * Plugin Name: Hoobert Sample Payments
+ * Description: A payment gateway that approves payments and refunds locally, installed by Hoobert's sample-data seeder so refund journeys work on a store with no real gateway. Not part of the Hoobert plugin.
  * Version: 1.0.0
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'plugins_loaded', 'woobert_sample_gateway_init', 11 );
+add_action( 'plugins_loaded', 'hoobert_sample_gateway_init', 11 );
 
 /**
  * Define and register the gateway once WooCommerce's base class is available.
  */
-function woobert_sample_gateway_init() {
-	if ( ! class_exists( 'WC_Payment_Gateway' ) || class_exists( 'Woobert_Sample_Gateway' ) ) {
+function hoobert_sample_gateway_init() {
+	if ( ! class_exists( 'WC_Payment_Gateway' ) || class_exists( 'Hoobert_Sample_Gateway' ) ) {
 		return;
 	}
 
@@ -139,13 +139,13 @@ function woobert_sample_gateway_init() {
 	 * An offline gateway that reports refund support, so partial and full refunds
 	 * succeed without contacting an external payment service.
 	 */
-	class Woobert_Sample_Gateway extends WC_Payment_Gateway {
+	class Hoobert_Sample_Gateway extends WC_Payment_Gateway {
 
 		public function __construct() {
-			$this->id                 = 'woobert_sample';
-			$this->method_title       = __( 'Sample Payments', 'woobert' );
-			$this->method_description = __( 'Approves payments and refunds locally. Intended for sample and development stores.', 'woobert' );
-			$this->title              = __( 'Sample Payments', 'woobert' );
+			$this->id                 = 'hoobert_sample';
+			$this->method_title       = __( 'Sample Payments', 'hoobert' );
+			$this->method_description = __( 'Approves payments and refunds locally. Intended for sample and development stores.', 'hoobert' );
+			$this->title              = __( 'Sample Payments', 'hoobert' );
 			$this->has_fields         = false;
 			$this->supports           = array( 'products', 'refunds' );
 
@@ -159,9 +159,9 @@ function woobert_sample_gateway_init() {
 		public function init_form_fields() {
 			$this->form_fields = array(
 				'enabled' => array(
-					'title'   => __( 'Enable/Disable', 'woobert' ),
+					'title'   => __( 'Enable/Disable', 'hoobert' ),
 					'type'    => 'checkbox',
-					'label'   => __( 'Enable Sample Payments', 'woobert' ),
+					'label'   => __( 'Enable Sample Payments', 'hoobert' ),
 					'default' => 'yes',
 				),
 			);
@@ -183,15 +183,15 @@ function woobert_sample_gateway_init() {
 		public function process_refund( $order_id, $amount = null, $reason = '' ) {
 			$order = wc_get_order( $order_id );
 			if ( ! $order ) {
-				return new WP_Error( 'woobert_sample_refund', __( 'Order not found.', 'woobert' ) );
+				return new WP_Error( 'hoobert_sample_refund', __( 'Order not found.', 'hoobert' ) );
 			}
 
 			$order->add_order_note(
 				sprintf(
 					/* translators: 1: refund amount, 2: optional reason. */
-					__( 'Sample Payments refunded %1$s.%2$s', 'woobert' ),
+					__( 'Sample Payments refunded %1$s.%2$s', 'hoobert' ),
 					wc_format_decimal( $amount, wc_get_price_decimals() ),
-					$reason ? ' ' . sprintf( __( 'Reason: %s', 'woobert' ), $reason ) : ''
+					$reason ? ' ' . sprintf( __( 'Reason: %s', 'hoobert' ), $reason ) : ''
 				)
 			);
 
@@ -202,21 +202,21 @@ function woobert_sample_gateway_init() {
 	add_filter(
 		'woocommerce_payment_gateways',
 		function ( $gateways ) {
-			$gateways[] = 'Woobert_Sample_Gateway';
+			$gateways[] = 'Hoobert_Sample_Gateway';
 			return $gateways;
 		}
 	);
 }
 PHP;
 
-	$file = $dir . '/woobert-sample-payments.php';
+	$file = $dir . '/hoobert-sample-payments.php';
 	if ( ! file_exists( $file ) || file_get_contents( $file ) !== $source ) {
 		file_put_contents( $file, $source );
 	}
 
 	// Enable it so it shows as an active gateway, matching a real store.
 	update_option(
-		'woocommerce_' . WOOBERT_SEED_GATEWAY . '_settings',
+		'woocommerce_' . HOOBERT_SEED_GATEWAY . '_settings',
 		array(
 			'enabled' => 'yes',
 			'title'   => 'Sample Payments',
@@ -224,7 +224,7 @@ PHP;
 	);
 }
 
-woobert_install_sample_gateway();
+hoobert_install_sample_gateway();
 
 // --- Taxes ------------------------------------------------------------------
 
@@ -232,15 +232,15 @@ woobert_install_sample_gateway();
  * Insert a state tax rate once. Real stores charge tax only where they have nexus,
  * so only some customers are taxed, which keeps the sales report honest.
  */
-function woobert_tax_rate( string $key, array $rate ): void {
-	$id = woobert_seed_id( $key );
+function hoobert_tax_rate( string $key, array $rate ): void {
+	$id = hoobert_seed_id( $key );
 	if ( $id && WC_Tax::_get_tax_rate( $id ) ) {
 		return;
 	}
-	woobert_seed_remember( $key, (int) WC_Tax::_insert_tax_rate( $rate ) );
+	hoobert_seed_remember( $key, (int) WC_Tax::_insert_tax_rate( $rate ) );
 }
 
-woobert_tax_rate(
+hoobert_tax_rate(
 	'tax-us-ca',
 	array(
 		'tax_rate_country'  => 'US',
@@ -255,7 +255,7 @@ woobert_tax_rate(
 	)
 );
 
-woobert_tax_rate(
+hoobert_tax_rate(
 	'tax-us-ny',
 	array(
 		'tax_rate_country'  => 'US',
@@ -279,7 +279,7 @@ update_option( 'woocommerce_prices_include_tax', 'no' );
 /**
  * Create (or fetch) a product category by name.
  */
-function woobert_category( string $name ): int {
+function hoobert_category( string $name ): int {
 	$term = term_exists( $name, 'product_cat' );
 	if ( $term ) {
 		return (int) $term['term_id'];
@@ -288,17 +288,17 @@ function woobert_category( string $name ): int {
 	return is_wp_error( $created ) ? 0 : (int) $created['term_id'];
 }
 
-$cat_apparel     = woobert_category( 'Apparel' );
-$cat_accessories = woobert_category( 'Accessories' );
-$cat_home        = woobert_category( 'Home & Living' );
+$cat_apparel     = hoobert_category( 'Apparel' );
+$cat_accessories = hoobert_category( 'Accessories' );
+$cat_home        = hoobert_category( 'Home & Living' );
 
 // --- Simple products --------------------------------------------------------
 
 /**
  * Create a simple product unless this seed key already resolves to one.
  */
-function woobert_simple_product( array $args ): int {
-	$existing = woobert_seed_post( 'product:' . $args['sku'], $args['sku'] );
+function hoobert_simple_product( array $args ): int {
+	$existing = hoobert_seed_post( 'product:' . $args['sku'], $args['sku'] );
 	if ( $existing ) {
 		return $existing;
 	}
@@ -316,15 +316,15 @@ function woobert_simple_product( array $args ): int {
 	$product->set_short_description( $args['blurb'] ?? '' );
 	$product->set_description( $args['description'] ?? '' );
 	$product->set_weight( (string) ( $args['weight'] ?? '' ) );
-	$product->set_date_created( woobert_days_ago( 120 ) );
+	$product->set_date_created( hoobert_days_ago( 120 ) );
 	if ( ! empty( $args['category_id'] ) ) {
 		$product->set_category_ids( array( $args['category_id'] ) );
 	}
 
 	$id = (int) $product->save();
-	update_post_meta( $id, '_woobert_seed', $args['sku'] );
+	update_post_meta( $id, '_hoobert_seed', $args['sku'] );
 
-	return woobert_seed_remember( 'product:' . $args['sku'], $id );
+	return hoobert_seed_remember( 'product:' . $args['sku'], $id );
 }
 
 $catalog = array(
@@ -413,12 +413,12 @@ $catalog = array(
 
 $products = array();
 foreach ( $catalog as $item ) {
-	$products[ $item['sku'] ] = woobert_simple_product( $item );
+	$products[ $item['sku'] ] = hoobert_simple_product( $item );
 }
 
 // --- Variable product with a full variation matrix ---------------------------
 
-$variable_id = woobert_seed_post( 'product:TEE-ORG-1', 'TEE-ORG-1' );
+$variable_id = hoobert_seed_post( 'product:TEE-ORG-1', 'TEE-ORG-1' );
 
 if ( ! $variable_id ) {
 	$attr_color = new WC_Product_Attribute();
@@ -441,11 +441,11 @@ if ( ! $variable_id ) {
 	$variable->set_attributes( array( $attr_color, $attr_size ) );
 	$variable->set_short_description( 'GOTS-certified organic cotton tee.' );
 	$variable->set_description( 'A midweight tee in GOTS-certified organic cotton, knitted to hold its shape through repeated washing. Side-seamed with a taped neck. Runs true to size.' );
-	$variable->set_date_created( woobert_days_ago( 120 ) );
+	$variable->set_date_created( hoobert_days_ago( 120 ) );
 	$variable_id = (int) $variable->save();
 
-	update_post_meta( $variable_id, '_woobert_seed', 'TEE-ORG-1' );
-	woobert_seed_remember( 'product:TEE-ORG-1', $variable_id );
+	update_post_meta( $variable_id, '_hoobert_seed', 'TEE-ORG-1' );
+	hoobert_seed_remember( 'product:TEE-ORG-1', $variable_id );
 
 	// Stock and price vary across the matrix, and one variation is sold out,
 	// so stock and pricing tools have something non-uniform to act on.
@@ -470,11 +470,11 @@ if ( ! $variable_id ) {
 			}
 			$variation->set_manage_stock( true );
 			$variation->set_stock_quantity( $stock );
-			$variation->set_date_created( woobert_days_ago( 120 ) );
+			$variation->set_date_created( hoobert_days_ago( 120 ) );
 			$variation_id = (int) $variation->save();
 
-			update_post_meta( $variation_id, '_woobert_seed', 'TEE-ORG-1-' . $code );
-			woobert_seed_remember( 'product:TEE-ORG-1-' . $code, $variation_id );
+			update_post_meta( $variation_id, '_hoobert_seed', 'TEE-ORG-1-' . $code );
+			hoobert_seed_remember( 'product:TEE-ORG-1-' . $code, $variation_id );
 		}
 	}
 
@@ -483,7 +483,7 @@ if ( ! $variable_id ) {
 
 $products['TEE-ORG-1'] = $variable_id;
 foreach ( array( 'RS', 'RM', 'RL', 'BS', 'BM', 'BL', 'GS', 'GM', 'GL' ) as $code ) {
-	$products[ 'TEE-ORG-1-' . $code ] = woobert_seed_post( 'product:TEE-ORG-1-' . $code, 'TEE-ORG-1-' . $code );
+	$products[ 'TEE-ORG-1-' . $code ] = hoobert_seed_post( 'product:TEE-ORG-1-' . $code, 'TEE-ORG-1-' . $code );
 }
 
 // --- Coupons ----------------------------------------------------------------
@@ -491,7 +491,7 @@ foreach ( array( 'RS', 'RM', 'RL', 'BS', 'BM', 'BL', 'GS', 'GM', 'GL' ) as $code
 /**
  * Create a coupon once, keyed by code.
  */
-function woobert_coupon( array $args ): int {
+function hoobert_coupon( array $args ): int {
 	$existing = wc_get_coupon_id_by_code( $args['code'] );
 	if ( $existing ) {
 		return (int) $existing;
@@ -518,13 +518,13 @@ function woobert_coupon( array $args ): int {
 	return (int) $coupon->save();
 }
 
-woobert_coupon(
+hoobert_coupon(
 	array(
 		'code'           => 'WELCOME10',
 		'type'           => 'percent',
 		'amount'         => 10,
 		'description'    => '10% off a first order.',
-		'expires'        => woobert_days_ago( -60 ),
+		'expires'        => hoobert_days_ago( -60 ),
 		'minimum'        => 25,
 		'usage_limit'    => 500,
 		'limit_per_user' => 1,
@@ -532,13 +532,13 @@ woobert_coupon(
 );
 
 // An expired coupon, so list_coupons and update_coupon have a realistic second row.
-woobert_coupon(
+hoobert_coupon(
 	array(
 		'code'        => 'SPRING15',
 		'type'        => 'fixed_cart',
 		'amount'      => 15,
 		'description' => 'Spring promotion, $15 off orders over $75.',
-		'expires'     => woobert_days_ago( 20 ),
+		'expires'     => hoobert_days_ago( 20 ),
 		'minimum'     => 75,
 	)
 );
@@ -586,7 +586,7 @@ $customers = array(
  * straight to post meta and so misses orders stored in HPOS tables. set_props()
  * skips any setter a given object lacks (shipping has no email, for instance).
  */
-function woobert_address_props( array $person, string $type ): array {
+function hoobert_address_props( array $person, string $type ): array {
 	$address = array(
 		'first_name' => $person['first'],
 		'last_name'  => $person['last'],
@@ -636,16 +636,16 @@ foreach ( $customers as $slug => $person ) {
 				'first_name'   => $person['first'],
 				'last_name'    => $person['last'],
 				'display_name' => $person['first'] . ' ' . $person['last'],
-				'date_created' => woobert_days_ago( 100 ),
+				'date_created' => hoobert_days_ago( 100 ),
 			),
-			woobert_address_props( $person, 'billing' ),
-			woobert_address_props( $person, 'shipping' )
+			hoobert_address_props( $person, 'billing' ),
+			hoobert_address_props( $person, 'shipping' )
 		)
 	);
 	$customer->save();
 
 	$customer_ids[ $slug ] = $user_id;
-	woobert_seed_remember( 'customer:' . $slug, $user_id );
+	hoobert_seed_remember( 'customer:' . $slug, $user_id );
 }
 
 // Guests, who check out without an account. Real stores have plenty.
@@ -679,14 +679,14 @@ $guests = array(
  * optional coupon, and dates that sit in the past. Statuses are applied last so
  * WooCommerce runs its own stock and paid-date transitions, as on a real store.
  */
-function woobert_order( string $key, array $plan, array $products, array $people ): int {
-	$existing = woobert_seed_id( $key );
+function hoobert_order( string $key, array $plan, array $products, array $people ): int {
+	$existing = hoobert_seed_id( $key );
 	if ( $existing && wc_get_order( $existing ) ) {
 		return $existing;
 	}
 
 	$person  = $people[ $plan['person'] ];
-	$created = woobert_days_ago( $plan['days_ago'] );
+	$created = hoobert_days_ago( $plan['days_ago'] );
 
 	// Resolve every line item first. A half-populated order is worse than none,
 	// so bail if the catalog is missing anything this order needs.
@@ -694,7 +694,7 @@ function woobert_order( string $key, array $plan, array $products, array $people
 	foreach ( $plan['items'] as $sku => $qty ) {
 		$product = empty( $products[ $sku ] ) ? null : wc_get_product( $products[ $sku ] );
 		if ( ! $product ) {
-			woobert_seed_log( "  ! {$key} skipped: product {$sku} not found." );
+			hoobert_seed_log( "  ! {$key} skipped: product {$sku} not found." );
 			return 0;
 		}
 		$line_items[] = array( $product, $qty );
@@ -702,18 +702,18 @@ function woobert_order( string $key, array $plan, array $products, array $people
 
 	$order = wc_create_order( array( 'customer_id' => $plan['customer_id'] ?? 0 ) );
 	if ( is_wp_error( $order ) ) {
-		woobert_seed_log( "  ! {$key} skipped: " . $order->get_error_message() );
+		hoobert_seed_log( "  ! {$key} skipped: " . $order->get_error_message() );
 		return 0;
 	}
 
 	$order->set_props(
 		array_merge(
-			woobert_address_props( $person, 'billing' ),
-			woobert_address_props( $person, 'shipping' )
+			hoobert_address_props( $person, 'billing' ),
+			hoobert_address_props( $person, 'shipping' )
 		)
 	);
 	$order->set_created_via( 'checkout' );
-	$order->set_payment_method( WOOBERT_SEED_GATEWAY );
+	$order->set_payment_method( HOOBERT_SEED_GATEWAY );
 	$order->set_payment_method_title( 'Sample Payments' );
 
 	foreach ( $line_items as $line ) {
@@ -729,7 +729,7 @@ function woobert_order( string $key, array $plan, array $products, array $people
 	if ( ! empty( $plan['coupon'] ) ) {
 		$applied = $order->apply_coupon( $plan['coupon'] );
 		if ( is_wp_error( $applied ) ) {
-			woobert_seed_log( "  ! coupon {$plan['coupon']} rejected on {$key}: " . $applied->get_error_message() );
+			hoobert_seed_log( "  ! coupon {$plan['coupon']} rejected on {$key}: " . $applied->get_error_message() );
 		}
 	}
 
@@ -746,14 +746,14 @@ function woobert_order( string $key, array $plan, array $products, array $people
 		$order->set_date_completed( $created + DAY_IN_SECONDS );
 	}
 
-	$order->update_meta_data( '_woobert_seed', $key );
+	$order->update_meta_data( '_hoobert_seed', $key );
 
 	// Saving with the final status lets WooCommerce run its own transition hooks,
 	// which reduce stock and, for 'refunded', create the matching full refund.
 	$order->set_status( $plan['status'] );
 	$order->save();
 
-	return woobert_seed_remember( $key, (int) $order->get_id() );
+	return hoobert_seed_remember( $key, (int) $order->get_id() );
 }
 
 $people = array_merge( $customers, $guests );
@@ -858,7 +858,7 @@ $order_plan = array(
 
 $order_ids = array();
 foreach ( $order_plan as $key => $plan ) {
-	$order_ids[ $key ] = woobert_order( $key, $plan, $products, $people );
+	$order_ids[ $key ] = hoobert_order( $key, $plan, $products, $people );
 }
 
 // --- Refunds ----------------------------------------------------------------
@@ -869,8 +869,8 @@ foreach ( $order_plan as $key => $plan ) {
  * `refund_payment` stays false: the sample gateway is a must-use plugin that is
  * not loaded inside this seeding request, and there is no real money to move.
  */
-function woobert_partial_refund( string $key, int $order_id, string $amount, string $reason, int $days_ago ): void {
-	if ( woobert_seed_id( $key ) ) {
+function hoobert_partial_refund( string $key, int $order_id, string $amount, string $reason, int $days_ago ): void {
+	if ( hoobert_seed_id( $key ) ) {
 		return;
 	}
 	$order = wc_get_order( $order_id );
@@ -889,18 +889,18 @@ function woobert_partial_refund( string $key, int $order_id, string $amount, str
 	);
 
 	if ( is_wp_error( $refund ) ) {
-		woobert_seed_log( '  ! refund failed: ' . $refund->get_error_message() );
+		hoobert_seed_log( '  ! refund failed: ' . $refund->get_error_message() );
 		return;
 	}
 
-	$refund->set_date_created( woobert_days_ago( $days_ago ) );
+	$refund->set_date_created( hoobert_days_ago( $days_ago ) );
 	$refund->save();
-	woobert_seed_remember( $key, (int) $refund->get_id() );
+	hoobert_seed_remember( $key, (int) $refund->get_id() );
 }
 
 // A completed order that kept its status but returned part of the money.
 if ( ! empty( $order_ids['order:04'] ) ) {
-	woobert_partial_refund( 'refund:04', $order_ids['order:04'], '15.00', 'Damaged in transit', 52 );
+	hoobert_partial_refund( 'refund:04', $order_ids['order:04'], '15.00', 'Damaged in transit', 52 );
 }
 
 // --- Reviews ----------------------------------------------------------------
@@ -909,12 +909,12 @@ if ( ! empty( $order_ids['order:04'] ) ) {
  * Insert a review tied to a real reviewer. Reviews from customers who bought the
  * product are marked verified, which is what WooCommerce shows in the admin.
  */
-function woobert_review( string $key, int $product_id, array $args ): void {
-	if ( woobert_seed_id( $key ) ) {
+function hoobert_review( string $key, int $product_id, array $args ): void {
+	if ( hoobert_seed_id( $key ) ) {
 		return;
 	}
 
-	$timestamp = woobert_days_ago( $args['days_ago'] );
+	$timestamp = hoobert_days_ago( $args['days_ago'] );
 	$comment_id = wp_insert_comment(
 		array(
 			'comment_post_ID'      => $product_id,
@@ -935,8 +935,8 @@ function woobert_review( string $key, int $product_id, array $args ): void {
 
 	add_comment_meta( $comment_id, 'rating', $args['rating'] );
 	add_comment_meta( $comment_id, 'verified', $args['verified'] ? 1 : 0 );
-	add_comment_meta( $comment_id, '_woobert_seed', $key );
-	woobert_seed_remember( $key, (int) $comment_id );
+	add_comment_meta( $comment_id, '_hoobert_seed', $key );
+	hoobert_seed_remember( $key, (int) $comment_id );
 }
 
 $reviews = array(
@@ -1027,7 +1027,7 @@ foreach ( $reviews as $key => $review ) {
 		continue;
 	}
 
-	woobert_review(
+	hoobert_review(
 		$key,
 		$product_id,
 		array(
@@ -1061,7 +1061,7 @@ foreach ( array_keys( $reviewed_products ) as $product_id ) {
  * save. Nothing drains that queue during WP-CLI seeding or a Playground boot, so
  * the reports would otherwise show every customer with zero orders and zero spend.
  */
-function woobert_sync_analytics( array $order_ids, array $customer_ids ): void {
+function hoobert_sync_analytics( array $order_ids, array $customer_ids ): void {
 	$orders_scheduler    = 'Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler';
 	$customers_scheduler = 'Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler';
 
@@ -1107,12 +1107,12 @@ function woobert_sync_analytics( array $order_ids, array $customer_ids ): void {
 	}
 }
 
-woobert_sync_analytics( array_filter( $order_ids ), array_values( $customer_ids ) );
+hoobert_sync_analytics( array_filter( $order_ids ), array_values( $customer_ids ) );
 
 // The legacy wc/v3/reports/* endpoints cache their aggregates in transients.
 wc_delete_shop_order_transients();
 
-woobert_seed_log(
+hoobert_seed_log(
 	sprintf(
 		'Seeded %d products, %d customers, %d orders, %d reviews, 2 coupons.',
 		count( $products ),
@@ -1121,4 +1121,4 @@ woobert_seed_log(
 		count( $reviews )
 	)
 );
-woobert_seed_log( 'Sample data seeded.' );
+hoobert_seed_log( 'Sample data seeded.' );

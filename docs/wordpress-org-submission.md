@@ -1,61 +1,32 @@
 # Publishing to the WordPress.org plugin directory
 
-Everything needed to submit Woobert, plus what still has to be decided. Sources:
+Everything needed to submit Hoobert, plus what still has to be decided. Sources:
 [Add your plugin](https://wordpress.org/plugins/developers/add/),
 [detailed guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/),
 [plugin assets](https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/),
 [common issues](https://developer.wordpress.org/plugins/wordpress-org/common-issues/).
 
-## Blocker: the name
+## The name
 
-**"Woobert" cannot be published under that name or slug.** This is not a judgement
-call; it is a hard automated rejection. WordPress.org's own Plugin Check tool reports:
+The plugin was called **Woobert** until July 2026. It could not have shipped under
+that name: WordPress.org treats "woo" as restricted on behalf of Automattic, and a
+slug is **permanent once approved**, so there would have been no fixing it later.
 
-```
-WARNING  trademarked_term  The plugin name includes a restricted term. Your chosen
-plugin name - "Woobert" - contains the restricted term "woo" which cannot be used
-at all in your plugin name.
+The mechanics, since they matter when naming anything else in this project. "woo"
+is the only entry in Plugin Check's `PORTMANTEAUS` list (`Trademarks_Check.php`),
+matched with `stripos( $slug, 'woo' ) === 0`. The bar is that a slug may not
+*begin* with "woo". The message the tool prints ("cannot be used at all")
+overstates its own rule, but "woobert" failed either way. This sits under
+[guideline 17](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names).
 
-WARNING  trademarked_term  The plugin slug includes a restricted term. Your plugin
-slug - "woobert" - contains the restricted term "woo" which cannot be used at all
-in your plugin slug.
-```
+To screen a candidate name without renaming anything, extract `TRADEMARK_SLUGS`
+and `PORTMANTEAUS` from that file and run the slug through the same two loops.
+Terms ending in `-` are prefix-only; the rest match anywhere, minus the
+`for-TRADEMARK` / `with-TRADEMARK` exceptions. "hoobert" is clear on both lists.
 
-The rule is [guideline 17](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#17-plugins-must-respect-trademarks-copyrights-and-project-names):
-trademarked terms may not be the sole or initial term of a slug. "woo" is handled
-by a rule of its own: it is the only entry in the checker's `PORTMANTEAUS` list
-(`Trademarks_Check.php`), matched with `stripos( $slug, 'woo' ) === 0`. So the bar
-is that a slug may not *begin* with "woo", which "woobert" does. The wording the
-tool prints ("cannot be used at all") overstates its own rule, but the outcome for
-this name is the same either way. The slug is also **permanent once approved**, so
-there is no fixing it later.
-
-Candidate names can be checked against the real list without renaming anything:
-extract `TRADEMARK_SLUGS` and `PORTMANTEAUS` from that file and run a slug through
-the same two loops. Terms ending in `-` are prefix-only; the rest match anywhere,
-minus the `for-TRADEMARK` / `with-TRADEMARK` exceptions.
-
-Two things follow:
-
-1. **Pick a directory name without "woo" in it.** WooCommerce may still appear
-   *after* the product name, in the "X for WooCommerce" form the guidelines
-   explicitly bless. So `<Name> - AI Command Bar for WooCommerce` is fine as the
-   display name as long as `<Name>` is clean.
-2. **Decide whether the product renames or only the listing does.** The directory
-   name and the slug must be clean. The owl, the settings page, the docs, and the
-   marketing site can keep whatever branding you want, but a listing that calls
-   itself one thing while every screen says another is a bad look and reviewers
-   do comment on it.
-
-Renaming touches: `Plugin Name` in `plugin/woobert/woobert.php`, the readme title,
-the `woobert` text domain, the `Woobert_` class prefix, the `WOOBERT_*` constants,
-the `woobert_options` option, the `woobert/v1` REST namespace, the
-`{prefix}woobert_history` table, the `woobert` JS global, the plugin folder name,
-the zip name in the release workflow and blueprint, and `SLUG` in the deploy step.
-Option and table names need a migration if any install already exists; today none
-do, so this is the cheapest it will ever be.
-
-Everything below is ready and unaffected by the naming decision, except where noted.
+WooCommerce may still appear *after* the product name, which is why the readme
+title is `Hoobert - AI Command Bar for WooCommerce`. That "X for WooCommerce" form
+is explicitly allowed.
 
 ## Assets
 
@@ -70,7 +41,7 @@ It rasterises through headless Chrome, so there are no npm dependencies. Set
 
 | File | Size | Source | Status |
 | --- | --- | --- | --- |
-| `.wordpress-org/icon-128x128.png` | 128x128 | `assets-src/woobert-owl.svg` | done |
+| `.wordpress-org/icon-128x128.png` | 128x128 | `assets-src/hoobert-owl.svg` | done |
 | `.wordpress-org/icon-256x256.png` | 256x256 | same | done |
 | `.wordpress-org/icon.svg` | vector | same | done |
 | `.wordpress-org/banner-772x250.png` | 772x250 | `assets-src/banner.html` | done |
@@ -80,14 +51,14 @@ It rasterises through headless Chrome, so there are no npm dependencies. Set
 
 ### About the owl
 
-`assets-src/woobert-owl.svg` is a vector redraw of the "funny owl" icon by
+`assets-src/hoobert-owl.svg` is a vector redraw of the "funny owl" icon by
 agustrisana on Flaticon, in the Fernfly palette. **If you have the original PNG,
-drop it in as `assets-src/woobert-owl.png`** and re-run the build; the script
+drop it in as `assets-src/hoobert-owl.png`** and re-run the build; the script
 prefers it for the icons automatically. The redraw exists so the pipeline works
 without it, not because it is better.
 
 The Flaticon free licence requires attribution wherever the icon appears. It is
-in three places: the plugin settings screen (`Woobert_Settings::render_credits`),
+in three places: the plugin settings screen (`Hoobert_Settings::render_credits`),
 `readme.txt`, and the repository README.
 
 ### Screenshots
@@ -109,7 +80,7 @@ on the listing, two options that definitely work:
 
 - **Live Preview.** `.wordpress-org/blueprints/blueprint.json` is committed, which
   turns on the "Live Preview" button on the plugin page: a real, throwaway store
-  with WooCommerce, Woobert, and sample data, running in the visitor's browser.
+  with WooCommerce, Hoobert, and sample data, running in the visitor's browser.
   That beats a GIF. Note it still needs an endpoint and key to actually resolve a
   command, so decide whether to point the preview at a rate-limited public Fernfly
   project or let it demo the UI and settings only.
@@ -123,7 +94,7 @@ Verified by running WordPress.org's own tool against the plugin:
 
 ```bash
 docker compose run --rm --entrypoint wp wpcli plugin install plugin-check --activate
-docker compose run --rm --entrypoint wp wpcli plugin check woobert \
+docker compose run --rm --entrypoint wp wpcli plugin check hoobert \
   --exclude-directories=node_modules,src,scripts,build --format=csv
 ```
 
@@ -134,7 +105,7 @@ What the guidelines ask for, and where it is satisfied:
 
 | Guideline | Where |
 | --- | --- |
-| 1. GPL-compatible licence | `LICENSE` (GPL-2.0), headers in `woobert.php` and `readme.txt` |
+| 1. GPL-compatible licence | `LICENSE` (GPL-2.0), headers in `hoobert.php` and `readme.txt` |
 | 2. Stable tag matches a real version | `bump-version.js` keeps `Stable tag` in step with the plugin header |
 | 4. No obfuscation, source available | `src/` is committed; readme links the repo; the build is `wp-scripts` |
 | 5. No trialware or locked features | Everything in the plugin works; only the model is external |
@@ -143,10 +114,10 @@ What the guidelines ask for, and where it is satisfied:
 | 8. SaaS integration, not remote code | Only tool names and arguments come back; execution is local against `wc/v3` |
 | 9. No tracking without opt-in | None. No analytics, no telemetry, no phone-home |
 | 10. "Powered by" is not forced | No storefront output at all |
-| 11. Unique prefixes | `Woobert_`, `WOOBERT_`, `woobert_`, `woobert/v1` (all rename together) |
+| 11. Unique prefixes | `Hoobert_`, `HOOBERT_`, `hoobert_`, `hoobert/v1` |
 | 12. No hidden files | `.DS_Store` removed; the release workflow strips them from the zip |
-| 13. No unneeded files | The zip ships only `woobert.php`, `includes/`, `assets/`, `build/`, `tools.json`, `readme.txt`, `LICENSE` |
-| 17. Trademarks | **Unresolved. See the blocker above.** |
+| 13. No unneeded files | The zip ships only `hoobert.php`, `includes/`, `assets/`, `build/`, `tools.json`, `readme.txt`, `LICENSE` |
+| 17. Trademarks | Clear. `hoobert` passes both of Plugin Check's lists; see **The name** above |
 
 Security specifics reviewers look for, all present: `ABSPATH` guards on every PHP
 file, `permission_callback` on all three REST routes, `manage_woocommerce` checks,
@@ -166,7 +137,7 @@ Three things changed during this pass, worth knowing about:
   enqueueing the palette JS and CSS on every wp-admin screen for every user,
   including ones without `manage_woocommerce` who get a dead command. It is now
   gated on the capability.
-- **A privacy policy suggestion is registered.** `Woobert_Settings::privacy_policy_content()`
+- **A privacy policy suggestion is registered.** `Hoobert_Settings::privacy_policy_content()`
   hooks `wp_add_privacy_policy_content`, so the suggested wording shows up under
   Settings -> Privacy for merchants writing their own policy. Not required, but
   it is the expected courtesy for a plugin with an external service, and it saves
@@ -174,7 +145,12 @@ Three things changed during this pass, worth knowing about:
 
 ## Before you submit
 
-- [ ] Settle the name and slug, then rename everything in the list above.
+- [ ] Finish the rename outside this repo. The code is done; these are not:
+      rename the GitHub repository to `hoobert` (redirects cover the old URLs, but
+      `releases/latest/download/hoobert.zip` only starts resolving after the next
+      release), point `hoobert.fernfly.com` somewhere, and rename the Fernfly
+      project label. The tool set itself needs no retraining: no tool name in
+      `tools.json` carried the old name.
 - [ ] Confirm `Contributors: anuragbhandari` is the wp.org account that will own
       the listing. Add any co-maintainers now; the field is a comma-separated list
       of wp.org usernames, not display names.
@@ -186,7 +162,7 @@ Three things changed during this pass, worth knowing about:
       error. **Do not lower it below 6.6** without changing the JSX build.
       Note the practical floor is higher than the declared one: current WooCommerce
       requires WP 6.9, so a merchant on 6.6 is necessarily on an older WooCommerce.
-      Woobert declares `WC requires at least: 8.0`; the REST v3 routes it calls are
+      Hoobert declares `WC requires at least: 8.0`; the REST v3 routes it calls are
       stable across WooCommerce 8.x to 10.x, but that pairing is the one to test.
 - [ ] Set `Tested up to` to the WordPress version you last ran it against (7.0.2
       at time of writing). Reviewers do check this, and a stale value gets the
@@ -196,9 +172,9 @@ Three things changed during this pass, worth knowing about:
       publicly: `https://fernfly.com/terms-of-service` and
       `https://fernfly.com/privacy-policy`. Both currently resolve.
 - [ ] Decide the onboarding story. Right now a merchant has to create a Fernfly
-      project, import `tools.json`, train, and deploy before Woobert does anything.
+      project, import `tools.json`, train, and deploy before Hoobert does anything.
       That is a real cliff between installing and first value, and it is the most
-      likely reason a good listing still gets uninstalled. A hosted, shared Woobert
+      likely reason a good listing still gets uninstalled. A hosted, shared Hoobert
       project that new users can point at with one click would remove it.
 - [ ] `npm run build` and confirm `build/` is current.
 - [ ] Re-run Plugin Check. Expect zero errors.

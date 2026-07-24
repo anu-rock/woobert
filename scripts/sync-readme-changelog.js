@@ -19,7 +19,7 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..');
 const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
-const readmePath = path.join(repoRoot, 'plugin', 'woobert', 'readme.txt');
+const readmePath = path.join(repoRoot, 'plugin', 'hoobert', 'readme.txt');
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 const HEADING = '== Changelog ==';

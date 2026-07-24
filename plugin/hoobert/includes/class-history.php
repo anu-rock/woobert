@@ -1,6 +1,6 @@
 <?php
 /**
- * History of executed Woobert commands, stored in a custom table.
+ * History of executed Hoobert commands, stored in a custom table.
  *
  * Each run of a resolved tool call through /execute is recorded: which admin ran
  * it, the natural-language query, the WooCommerce REST request that ran, whether
@@ -8,18 +8,18 @@
  * log unbounded so the settings page can show the full store-wide audit trail; the
  * command palette panel reads just the current user's most recent entries.
  *
- * @package Woobert
+ * @package Hoobert
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Woobert_History {
+class Hoobert_History {
 
-	const TABLE       = 'woobert_history';
+	const TABLE       = 'hoobert_history';
 	const DB_VERSION  = '1';
-	const VERSION_OPT = 'woobert_db_version';
+	const VERSION_OPT = 'hoobert_db_version';
 	const PANEL_LIMIT = 25;
 
 	/**

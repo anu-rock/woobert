@@ -1,6 +1,6 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "/wp-admin/admin.php?page=woobert",
+  "landingPage": "/wp-admin/admin.php?page=hoobert",
   "preferredVersions": {
     "php": "8.2",
     "wp": "latest"
@@ -35,7 +35,7 @@
     {
       "step": "setSiteOptions",
       "options": {
-        "blogname": "Woobert Demo Store",
+        "blogname": "Hoobert Demo Store",
         "woocommerce_store_address": "123 Demo Street",
         "woocommerce_store_city": "Portland",
         "woocommerce_default_country": "US:OR",
@@ -51,15 +51,15 @@
     },
     {
       "step": "writeFile",
-      "path": "/tmp/woobert-seed.php",
+      "path": "/tmp/hoobert-seed.php",
       "data": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/antelligent-org/woobert/main/scripts/seed-sample-data.php"
+        "url": "https://raw.githubusercontent.com/antelligent-org/hoobert/main/scripts/seed-sample-data.php"
       }
     },
     {
       "step": "runPHP",
-      "code": "<?php require '/tmp/woobert-seed.php';"
+      "code": "<?php require '/tmp/hoobert-seed.php';"
     }
   ]
 }

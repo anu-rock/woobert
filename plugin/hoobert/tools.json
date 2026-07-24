@@ -1,7 +1,7 @@
 {
   "name": "woocommerce-rest-api-v3",
   "version": "1.0.0",
-  "description": "Merchant-facing tool set for the WooCommerce REST API v3 (wc/v3). Each tool maps a natural-language merchant intent to one authenticated REST call. The Fern model is trained on the `.tools[].function` objects; Woobert's executor reads the private `x-woo` block to dispatch the emitted call server-side.",
+  "description": "Merchant-facing tool set for the WooCommerce REST API v3 (wc/v3). Each tool maps a natural-language merchant intent to one authenticated REST call. The Fern model is trained on the `.tools[].function` objects; Hoobert's executor reads the private `x-woo` block to dispatch the emitted call server-side.",
   "docs": "https://developer.woocommerce.com/docs/apis/rest-api/v3/",
   "api": {
     "namespace": "wc/v3",

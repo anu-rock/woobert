@@ -1,8 +1,8 @@
-# Woobert
+# Hoobert
 
-An agentic **command bar for WooCommerce merchants**, built into WordPress's native `⌘K` command palette. Press `⌘K` / `Ctrl-K` anywhere in wp-admin, pick **Ask Woobert** and type what you want in plain English, like *"refund order 1042"*, *"add a Large/Red variation to this product at 54.99"*, or *"who are my top customers this month"*, and Woobert turns it into the right WooCommerce REST API v3 action and runs it.
+An agentic **command bar for WooCommerce merchants**, built into WordPress's native `⌘K` command palette. Press `⌘K` / `Ctrl-K` anywhere in wp-admin, pick **Ask Hoobert** and type what you want in plain English, like *"refund order 1042"*, *"add a Large/Red variation to this product at 54.99"*, or *"who are my top customers this month"*, and Hoobert turns it into the right WooCommerce REST API v3 action and runs it.
 
-Woobert is powered by **Fern**, a family of small language models from [Fernfly](https://fernfly.com). A tiny specialized model drives a complex admin surface faster than clicking through menus.
+Hoobert is powered by **Fern**, a family of small language models from [Fernfly](https://fernfly.com). A tiny specialized model drives a complex admin surface faster than clicking through menus.
 
 The browser never holds the inference key or WooCommerce credentials. A PHP proxy holds the inference key and executes REST calls in-process via `rest_do_request` under the current admin's capabilities. Destructive tools (refunds, deletes, status changes) are flagged `x-woo.confirm` and require a confirm click. Every executed command is written to a store-wide audit log.
 
@@ -19,17 +19,17 @@ The browser never holds the inference key or WooCommerce credentials. A PHP prox
 
 ## Architecture
 
-Woobert is a WordPress plugin, not a WooCommerce React (SPA) extension. The front-end is a thin command-palette client; all inference and REST execution happen server-side through the plugin's own admin-only routes (`woobert/v1`). Splitting **resolve** from **execute** lets the UI preview the chosen action, and confirm destructive ones, before anything runs.
+Hoobert is a WordPress plugin, not a WooCommerce React (SPA) extension. The front-end is a thin command-palette client; all inference and REST execution happen server-side through the plugin's own admin-only routes (`hoobert/v1`). Splitting **resolve** from **execute** lets the UI preview the chosen action, and confirm destructive ones, before anything runs.
 
 ```mermaid
 sequenceDiagram
     actor M as Merchant
     participant UI as Command palette<br/>(browser, src/)
-    participant Proxy as PHP proxy<br/>(woobert/v1)
+    participant Proxy as PHP proxy<br/>(hoobert/v1)
     participant Fern as Fernfly project<br/>/api/p/{id}/infer
     participant WC as WooCommerce<br/>REST API v3
 
-    M->>UI: ⌘K → "Ask Woobert: refund order 1042"
+    M->>UI: ⌘K → "Ask Hoobert: refund order 1042"
     UI->>Proxy: POST /resolve { query, context }
     Proxy->>Fern: POST { utterance, meta }  (X-Api-Key)
     Fern-->>Proxy: { calls: [{ name, arguments }] }
@@ -41,7 +41,7 @@ sequenceDiagram
     WC-->>Proxy: JSON result
     Proxy->>Proxy: record to command-history audit log
     Proxy-->>UI: result + merchant-facing display
-    UI-->>M: rendered in the Woobert modal
+    UI-->>M: rendered in the Hoobert modal
 ```
 
 Key decisions and why:
@@ -54,9 +54,9 @@ The proxy exposes three routes, all gated on `manage_woocommerce`:
 
 | Route                 | Method | Purpose                                                                                              |
 | --------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| `/woobert/v1/resolve` | POST   | Send `{ query, context }` to the inference endpoint; return the chosen tool call(s), each annotated with its confirm flag and description. No execution. |
-| `/woobert/v1/execute` | POST   | Run one resolved `{ name, arguments }` against WC REST v3 and record it to the audit log.            |
-| `/woobert/v1/history` | GET    | Return the recent command history for the current user.                                              |
+| `/hoobert/v1/resolve` | POST   | Send `{ query, context }` to the inference endpoint; return the chosen tool call(s), each annotated with its confirm flag and description. No execution. |
+| `/hoobert/v1/execute` | POST   | Run one resolved `{ name, arguments }` against WC REST v3 and record it to the audit log.            |
+| `/hoobert/v1/history` | GET    | Return the recent command history for the current user.                                              |
 
 ## Dev setup
 
@@ -66,7 +66,7 @@ Prerequisites: Docker (for the local WordPress + WooCommerce stack) and Node 22+
 cp .env.example .env            # local stack config (DB, admin account, port)
 
 # 1. Build the front-end bundle (needed before the plugin can activate).
-cd plugin/woobert && npm install && npm run build && cd ../..
+cd plugin/hoobert && npm install && npm run build && cd ../..
 
 # 2. Bring up the stack. The wpcli service provisions WordPress + WooCommerce,
 #    seeds sample data (idempotent, safe to re-run).
@@ -81,9 +81,9 @@ open http://localhost:8080/wp-admin
 
 If you bring the stack up before building the bundle, the plugin won't activate. Build it, then re-run provisioning with `docker compose run --rm wpcli`.
 
-Then set the inference endpoint URL and API key under **WooCommerce → Woobert** (see [Getting credentials from Fernfly](#getting-credentials-from-fernfly)). The WooCommerce REST API key/secret for external/curl testing are printed once in the `wpcli` logs.
+Then set the inference endpoint URL and API key under **WooCommerce → Hoobert** (see [Getting credentials from Fernfly](#getting-credentials-from-fernfly)). The WooCommerce REST API key/secret for external/curl testing are printed once in the `wpcli` logs.
 
-**Front-end workflow** (run inside `plugin/woobert`):
+**Front-end workflow** (run inside `plugin/hoobert`):
 
 ```bash
 npm run start        # wp-scripts build in watch mode
@@ -91,27 +91,27 @@ npm run build        # one-off production bundle
 npm run lint:js      # lint src/
 npm run format       # format src/
 npm run bump -- 0.2.0   # or: patch|minor|major. Bumps the version across
-                        # woobert.php, readme.txt, package.json, blueprint.json
+                        # hoobert.php, readme.txt, package.json, blueprint.json
 ```
 
 Docker images (WordPress, MariaDB, WP-CLI) are pinned in `docker-compose.yml` so every contributor runs the same versions; bump them deliberately alongside the plugin's "Tested up to" header.
 
-**No-install demo.** [`blueprint/`](blueprint/) holds a [WordPress Playground](https://wordpress.github.io/wordpress-playground/) blueprint that spins up a throwaway store in the browser, WooCommerce and Woobert pre-installed and seeded, no local stack required. See [`blueprint/README.md`](blueprint/README.md).
+**No-install demo.** [`blueprint/`](blueprint/) holds a [WordPress Playground](https://wordpress.github.io/wordpress-playground/) blueprint that spins up a throwaway store in the browser, WooCommerce and Hoobert pre-installed and seeded, no local stack required. See [`blueprint/README.md`](blueprint/README.md).
 
 ## Getting credentials from Fernfly
 
-Woobert needs two values, set on the settings page (**WooCommerce → Woobert**):
+Hoobert needs two values, set on the settings page (**WooCommerce → Hoobert**):
 
 - **Inference endpoint URL** - the full URL of your Fernfly project's infer route, e.g. `https://fernfly.com/api/p/abc-dddddd-xyz/infer`. This is a stable, project-level endpoint that always routes to the project's active deployment.
 - **API key** - the project's key, sent as the `X-Api-Key` header on every inference request.
 
-To get them, open your project in [Fernfly](https://fernfly.com) (the platform that fine-tunes and deploys the Fern model behind Woobert). The project owns the registered WooCommerce tool set and its active deployment; copy its infer URL and API key into the settings page. Until both are set, the command bar returns a "not configured" error.
+To get them, open your project in [Fernfly](https://fernfly.com) (the platform that fine-tunes and deploys the Fern model behind Hoobert). The project owns the registered WooCommerce tool set and its active deployment; copy its infer URL and API key into the settings page. Until both are set, the command bar returns a "not configured" error.
 
-The plugin sends only `{ utterance, meta }` to this endpoint. It does **not** send a tool list or a model id, because the project owns the tool set. Keep the tool set in the project in sync with [`plugin/woobert/tools.json`](plugin/woobert/tools.json) (see below).
+The plugin sends only `{ utterance, meta }` to this endpoint. It does **not** send a tool list or a model id, because the project owns the tool set. Keep the tool set in the project in sync with [`plugin/hoobert/tools.json`](plugin/hoobert/tools.json) (see below).
 
 ## Adding new tools
 
-The shipped tool set lives in [`plugin/woobert/tools.json`](plugin/woobert/tools.json): a single object with a metadata header (`name`, `version`, `api`, `context_variables`, `notes`) and a `tools` array. Each entry is a standard OpenAI **function-calling schema** (`type` + `function`) plus a private **`x-woo`** block that the plugin's executor reads to dispatch the call. The `function` half is what the Fern model is trained on; `x-woo` is stripped before the tool set is registered with Fern.
+The shipped tool set lives in [`plugin/hoobert/tools.json`](plugin/hoobert/tools.json): a single object with a metadata header (`name`, `version`, `api`, `context_variables`, `notes`) and a `tools` array. Each entry is a standard OpenAI **function-calling schema** (`type` + `function`) plus a private **`x-woo`** block that the plugin's executor reads to dispatch the call. The `function` half is what the Fern model is trained on; `x-woo` is stripped before the tool set is registered with Fern.
 
 ```jsonc
 {
@@ -146,7 +146,7 @@ The shipped tool set lives in [`plugin/woobert/tools.json`](plugin/woobert/tools
 }
 ```
 
-How the executor uses `x-woo` (see [`class-executor.php`](plugin/woobert/includes/class-executor.php)):
+How the executor uses `x-woo` (see [`class-executor.php`](plugin/hoobert/includes/class-executor.php)):
 
 1. Substitute `{token}` path params from the arguments and drop them from the payload.
 2. Remaining arguments go to the query string for `GET`, or the JSON body for writes.
@@ -167,16 +167,16 @@ Keep the set focused. It is deliberately capped at ~28 tools covering core journ
 
 | Path                           | What                                                                                                 |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `plugin/woobert/`              | The WordPress plugin. Main file `woobert.php`.                                                       |
-| `plugin/woobert/src/`          | Command-palette front-end (`index.js`, `flow.js`, `history.js`, `api.js`), built with `@wordpress/scripts`. |
-| `plugin/woobert/includes/`     | PHP: `class-rest-proxy` (routes), `class-executor` (dispatch), `class-fern-client` (inference), `class-tools` (tool-set loader), `class-history` (audit log), `class-settings` (settings page). |
-| `plugin/woobert/tools.json`    | The shipped tool set: metadata header + 28 merchant tools, each an OpenAI function schema plus an `x-woo` dispatch block. |
+| `plugin/hoobert/`              | The WordPress plugin. Main file `hoobert.php`.                                                       |
+| `plugin/hoobert/src/`          | Command-palette front-end (`index.js`, `flow.js`, `history.js`, `api.js`), built with `@wordpress/scripts`. |
+| `plugin/hoobert/includes/`     | PHP: `class-rest-proxy` (routes), `class-executor` (dispatch), `class-fern-client` (inference), `class-tools` (tool-set loader), `class-history` (audit log), `class-settings` (settings page). |
+| `plugin/hoobert/tools.json`    | The shipped tool set: metadata header + 28 merchant tools, each an OpenAI function schema plus an `x-woo` dispatch block. |
 | `blueprint/`                   | WordPress Playground blueprint for a zero-install browser demo.                                      |
 | `docker-compose.yml`           | Pinned WordPress + MariaDB + WP-CLI for local dev. The wpcli service auto-provisions the stack.      |
 | `scripts/setup.sh`             | Runs in the wpcli container: installs WP + WooCommerce, seeds sample data, mints REST API keys. Idempotent. |
 | `scripts/seed-sample-data.php` | Products, a variable product, orders across 90 days and every status, refunds, customers, reviews, coupons, plus a refund-capable sample gateway. Idempotent. Shared by local dev and the blueprint demo. |
 | `scripts/generate-api-key.php` | Mints a WooCommerce REST consumer key/secret for external testing.                                   |
-| `assets-src/`                  | Sources for the plugin-directory artwork: the owl (`woobert-owl.svg`) and the banner layout (`banner.html`). |
+| `assets-src/`                  | Sources for the plugin-directory artwork: the owl (`hoobert-owl.svg`) and the banner layout (`banner.html`). |
 | `.wordpress-org/`              | Generated directory assets (icons, banners, preview blueprint) plus hand-added screenshots. Copied to SVN `assets/` on release. |
 | `docs/wordpress-org-submission.md` | Everything needed to publish to the WordPress.org plugin directory.                              |
 
@@ -195,7 +195,7 @@ Keep the set focused. It is deliberately capped at ~28 tools covering core journ
 
 ## Publishing
 
-Woobert is built to ship through the WordPress.org plugin directory.
+Hoobert is built to ship through the WordPress.org plugin directory.
 [`docs/wordpress-org-submission.md`](docs/wordpress-org-submission.md) covers the
 guidelines, the compliance checklist, and the submission steps.
 
@@ -206,15 +206,15 @@ node scripts/build-wporg-assets.mjs   # icons + banners -> .wordpress-org/
 ```
 
 Screenshots are added by hand as `.wordpress-org/screenshot-N.png`, matching the
-captions in [`readme.txt`](plugin/woobert/readme.txt). Once the plugin is approved
+captions in [`readme.txt`](plugin/hoobert/readme.txt). Once the plugin is approved
 and `SVN_USERNAME` / `SVN_PASSWORD` are set as repository secrets, the release
 workflow publishes each release to wp.org automatically.
 
 ## About
 
-Woobert is a merchant-facing command bar for WooCommerce, packaged as a production WordPress plugin. It is a satellite of the [Fernfly](https://fernfly.com) platform, which fine-tunes and deploys **Fern**, the small function-calling model that maps each merchant utterance to a tool call.
+Hoobert is a merchant-facing command bar for WooCommerce, packaged as a production WordPress plugin. It is a satellite of the [Fernfly](https://fernfly.com) platform, which fine-tunes and deploys **Fern**, the small function-calling model that maps each merchant utterance to a tool call.
 
-Woobert is a proof that a tiny, specialized model driving a real, complex admin surface: the plugin ships a fixed tool set, executes REST calls under the admin's own capabilities, confirms anything destructive, and logs every command. No keys in the browser, no SPA, no general-purpose LLM in the loop.
+Hoobert is a proof that a tiny, specialized model driving a real, complex admin surface: the plugin ships a fixed tool set, executes REST calls under the admin's own capabilities, confirms anything destructive, and logs every command. No keys in the browser, no SPA, no general-purpose LLM in the loop.
 
 License: GPL-2.0-or-later.
 

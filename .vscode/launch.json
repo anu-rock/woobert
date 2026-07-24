@@ -2,12 +2,12 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Listen for Xdebug (Woobert)",
+			"name": "Listen for Xdebug (Hoobert)",
 			"type": "php",
 			"request": "launch",
 			"port": 9003,
 			"pathMappings": {
-				"/var/www/html/wp-content/plugins/woobert": "${workspaceFolder}/plugin/woobert"
+				"/var/www/html/wp-content/plugins/hoobert": "${workspaceFolder}/plugin/hoobert"
 			}
 		}
 	]

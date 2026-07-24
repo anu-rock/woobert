@@ -1,10 +1,10 @@
 /**
- * Flow-modal styling. Kept self-contained and scoped under .woobert-* so it
- * never leaks into wp-admin. Dark, centered modal shown after "Ask Woobert"
+ * Flow-modal styling. Kept self-contained and scoped under .hoobert-* so it
+ * never leaks into wp-admin. Dark, centered modal shown after "Ask Hoobert"
  * is picked from the command palette.
  */
 
-.woobert-positioner {
+.hoobert-positioner {
 	position: fixed;
 	inset: 0;
 	display: flex;
@@ -15,7 +15,7 @@
 	z-index: 100000;
 }
 
-.woobert-animator {
+.hoobert-animator {
 	width: 620px;
 	max-width: calc( 100vw - 32px );
 	background: #1c2024;
@@ -28,45 +28,45 @@
 
 /* --- Flow modal header --- */
 
-.woobert-flow-head {
+.hoobert-flow-head {
 	padding: 16px 20px;
 	font-size: 15px;
 	color: #eef1f3;
 	border-bottom: 1px solid rgba( 255, 255, 255, 0.08 );
 }
 
-.woobert-flow-head .q {
+.hoobert-flow-head .q {
 	color: #a7d98d;
 }
 
-/* --- Woobert resolve/execute panel --- */
+/* --- Hoobert resolve/execute panel --- */
 
-.woobert-panel {
+.hoobert-panel {
 	padding: 16px 20px 20px;
 }
 
-.woobert-status {
+.hoobert-status {
 	margin: 0 0 12px;
 	font-size: 13px;
 	color: #b9c2ca;
 }
 
-.woobert-status.is-ok {
+.hoobert-status.is-ok {
 	color: #7bb661;
 }
 
-.woobert-status.is-error {
+.hoobert-status.is-error {
 	color: #e0736b;
 }
 
-.woobert-confirm-message {
+.hoobert-confirm-message {
 	margin: 0 0 4px;
 	font-size: 14px;
 	line-height: 1.5;
 	color: #eef1f3;
 }
 
-.woobert-call-name {
+.hoobert-call-name {
 	display: inline-block;
 	padding: 3px 8px;
 	font-size: 13px;
@@ -75,8 +75,8 @@
 	border-radius: 6px;
 }
 
-.woobert-call-args,
-.woobert-result .woobert-call-args {
+.hoobert-call-args,
+.hoobert-result .hoobert-call-args {
 	margin: 10px 0 0;
 	padding: 12px;
 	max-height: 320px;
@@ -90,30 +90,30 @@
 }
 
 /* JSON syntax highlighting tokens. */
-.woobert-json-key {
+.hoobert-json-key {
 	color: #9cdcfe;
 }
 
-.woobert-json-string {
+.hoobert-json-string {
 	color: #ce9178;
 }
 
-.woobert-json-number {
+.hoobert-json-number {
 	color: #b5cea8;
 }
 
-.woobert-json-boolean,
-.woobert-json-null {
+.hoobert-json-boolean,
+.hoobert-json-null {
 	color: #569cd6;
 }
 
-.woobert-result-summary {
+.hoobert-result-summary {
 	margin: 12px 0 0;
 	font-size: 13px;
 	color: #eef1f3;
 }
 
-.woobert-result-title {
+.hoobert-result-title {
 	margin: 12px 0 0;
 	font-size: 15px;
 	font-weight: 600;
@@ -122,14 +122,14 @@
 
 /* --- Merchant-facing result table (lists) --- */
 
-.woobert-table {
+.hoobert-table {
 	width: 100%;
 	margin-top: 12px;
 	border-collapse: collapse;
 	font-size: 13px;
 }
 
-.woobert-table th {
+.hoobert-table th {
 	padding: 6px 10px;
 	text-align: left;
 	font-size: 11px;
@@ -139,7 +139,7 @@
 	border-bottom: 1px solid rgba( 255, 255, 255, 0.12 );
 }
 
-.woobert-table td {
+.hoobert-table td {
 	padding: 8px 10px;
 	color: #eef1f3;
 	border-bottom: 1px solid rgba( 255, 255, 255, 0.06 );
@@ -147,31 +147,31 @@
 
 /* --- Merchant-facing field list (single object) --- */
 
-.woobert-fields {
+.hoobert-fields {
 	display: grid;
 	grid-template-columns: max-content 1fr;
 	gap: 8px 18px;
 	margin: 12px 0 0;
 }
 
-.woobert-fields dt {
+.hoobert-fields dt {
 	font-size: 12px;
 	color: #8a939b;
 }
 
-.woobert-fields dd {
+.hoobert-fields dd {
 	margin: 0;
 	font-size: 13px;
 	color: #eef1f3;
 }
 
-.woobert-actions {
+.hoobert-actions {
 	display: flex;
 	gap: 8px;
 	margin-top: 14px;
 }
 
-.woobert-btn {
+.hoobert-btn {
 	padding: 8px 16px;
 	font-size: 13px;
 	color: #eef1f3;
@@ -181,7 +181,7 @@
 	cursor: pointer;
 }
 
-.woobert-btn.is-primary {
+.hoobert-btn.is-primary {
 	background: #7bb661;
 	color: #10140f;
 	font-weight: 600;
@@ -189,13 +189,13 @@
 
 /* --- Debug info (collapsible) --- */
 
-.woobert-debug {
+.hoobert-debug {
 	margin-top: 16px;
 	padding-top: 12px;
 	border-top: 1px solid rgba( 255, 255, 255, 0.08 );
 }
 
-.woobert-debug summary {
+.hoobert-debug summary {
 	cursor: pointer;
 	list-style: none;
 	user-select: none;
@@ -203,19 +203,19 @@
 	color: #8a939b;
 }
 
-.woobert-debug summary::-webkit-details-marker {
+.hoobert-debug summary::-webkit-details-marker {
 	display: none;
 }
 
-.woobert-debug summary::before {
+.hoobert-debug summary::before {
 	content: "▸ ";
 }
 
-.woobert-debug[open] summary::before {
+.hoobert-debug[open] summary::before {
 	content: "▾ ";
 }
 
-.woobert-debug-label {
+.hoobert-debug-label {
 	margin: 12px 0 0;
 	font-size: 11px;
 	text-transform: uppercase;
@@ -223,7 +223,7 @@
 	color: #8a939b;
 }
 
-.woobert-debug-line {
+.hoobert-debug-line {
 	margin: 10px 0 0;
 	font-size: 12px;
 	color: #b9c2ca;
@@ -232,7 +232,7 @@
 
 /* --- Query history modal --- */
 
-.woobert-history-list {
+.hoobert-history-list {
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -240,33 +240,33 @@
 	overflow: auto;
 }
 
-.woobert-history-item {
+.hoobert-history-item {
 	padding: 12px 0;
 	border-bottom: 1px solid rgba( 255, 255, 255, 0.06 );
 }
 
-.woobert-history-item:first-child {
+.hoobert-history-item:first-child {
 	padding-top: 0;
 }
 
-.woobert-history-item:last-child {
+.hoobert-history-item:last-child {
 	border-bottom: 0;
 }
 
-.woobert-history-top {
+.hoobert-history-top {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 12px;
 }
 
-.woobert-history-query {
+.hoobert-history-query {
 	font-size: 14px;
 	color: #eef1f3;
 	word-break: break-word;
 }
 
-.woobert-badge {
+.hoobert-badge {
 	flex: 0 0 auto;
 	padding: 2px 8px;
 	font-size: 11px;
@@ -275,17 +275,17 @@
 	white-space: nowrap;
 }
 
-.woobert-badge.is-ok {
+.hoobert-badge.is-ok {
 	background: rgba( 123, 182, 97, 0.16 );
 	color: #a7d98d;
 }
 
-.woobert-badge.is-error {
+.hoobert-badge.is-error {
 	background: rgba( 224, 115, 107, 0.16 );
 	color: #e0736b;
 }
 
-.woobert-history-req {
+.hoobert-history-req {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
@@ -293,24 +293,24 @@
 	margin-top: 8px;
 }
 
-.woobert-history-route {
+.hoobert-history-route {
 	font-size: 12px;
 	color: #8a939b;
 	word-break: break-all;
 }
 
-.woobert-history-error {
+.hoobert-history-error {
 	margin: 8px 0 0;
 	font-size: 12px;
 	color: #e0736b;
 	word-break: break-word;
 }
 
-.woobert-history-args {
+.hoobert-history-args {
 	margin-top: 8px;
 }
 
-.woobert-history-args summary {
+.hoobert-history-args summary {
 	cursor: pointer;
 	list-style: none;
 	user-select: none;
@@ -318,23 +318,23 @@
 	color: #8a939b;
 }
 
-.woobert-history-args summary::-webkit-details-marker {
+.hoobert-history-args summary::-webkit-details-marker {
 	display: none;
 }
 
-.woobert-history-args summary::before {
+.hoobert-history-args summary::before {
 	content: "▸ ";
 }
 
-.woobert-history-args[open] summary::before {
+.hoobert-history-args[open] summary::before {
 	content: "▾ ";
 }
 
-.woobert-history-args .woobert-fields {
+.hoobert-history-args .hoobert-fields {
 	margin-top: 8px;
 }
 
-.woobert-history-time {
+.hoobert-history-time {
 	display: block;
 	margin-top: 8px;
 	font-size: 11px;
