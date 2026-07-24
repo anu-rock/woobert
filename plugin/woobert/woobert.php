@@ -69,6 +69,11 @@ add_action(
 add_action(
 	'admin_enqueue_scripts',
 	function () {
+		// The command bar is a store-manager tool; everyone else pays nothing for it.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
 		$asset_file = WOOBERT_PATH . 'build/index.asset.php';
 		$asset      = file_exists( $asset_file )
 			? require $asset_file
